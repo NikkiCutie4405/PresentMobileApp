@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0F172A">
+
+    <!-- Header with Back Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#2563EB"
+        android:padding="16dp">
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/placeholder"
+            android:contentDescription="Logo" />
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="Grades Overview"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- Overall Stats Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E293B"
+        android:padding="20dp"
+        android:layout_margin="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Overall GPA"
+            android:textColor="#94A3B8"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/txtOverallGPA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3.5"
+            android:textColor="#10B981"
+            android:textSize="48sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtGradeStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Based on 5 subjects"
+            android:textColor="#94A3B8"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+
+    <!-- Subjects Section Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Subjects"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="16dp"
+        android:background="#0F172A"/>
+
+    <!-- Scrollable Subjects List -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#0F172A">
+
+        <LinearLayout
+            android:id="@+id/subjectsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
+
+            <!-- Subject cards will be added dynamically here -->
+
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#2D2D2D"
+        android:paddingVertical="8dp">
+
+        <Button
+            android:id="@+id/home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏠"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2D2D2D"/>
+
+        <Button
+            android:id="@+id/course"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📚"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#2D2D2D"/>
+
+        <Button
+            android:id="@+id/Grades"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📊"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2563EB"/>
+
+
+        <Button
+            android:id="@+id/attendance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📅"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#2D2D2D"/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1F1F1F">
+
+    <!-- Header with Logo and Title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#2563EB"
+        android:padding="16dp">
+
+        <ImageView
+            android:background="@drawable/placeholder"
+            android:id="@+id/imgLogo"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:contentDescription="Logo" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MY COURSES"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <!-- Filter Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#1F1F1F">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔽"
+            android:textSize="24sp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="12dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerSemester"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:padding="12dp"
+            android:layout_marginEnd="12dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerYear"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:padding="12dp"/>
+    </LinearLayout>
+
+    <!-- Scrollable Course Cards -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#1F1F1F">
+
+        <LinearLayout
+            android:id="@+id/coursesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Course cards will be added here dynamically -->
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Fixed bottom navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#2D2D2D"
+        android:paddingVertical="8dp">
+
+        <Button
+            android:id="@+id/home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏠"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2D2D2D"/>
+
+        <Button
+            android:id="@+id/course"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📚"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#2563EB"/>
+
+        <Button
+            android:id="@+id/Grades"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📊"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#2D2D2D"/>
+
+        <Button
+            android:id="@+id/attendance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📅"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#2D2D2D"/>
+    </LinearLayout>
+
+</LinearLayout>
