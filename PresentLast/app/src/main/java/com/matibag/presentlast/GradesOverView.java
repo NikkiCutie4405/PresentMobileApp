@@ -10,14 +10,21 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+
+import androidx.activity.result.ActivityResultCallerLauncher;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 
 public class GradesOverView extends Activity {
-    Button HOME, COURSE, GRADES, ATTENDANCE;
+    Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR;
     ImageView PROFILE;
     LinearLayout subjectsContainer;
     TextView txtOverallGPA, txtGradeStats;
+    private ActivityResultLauncher<ScanOptions> barcodeLauncher;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,6 +32,7 @@ public class GradesOverView extends Activity {
         setContentView(R.layout.overview);
 
         // Initialize views
+        btnScanQR = findViewById(R.id.scanButton);
         subjectsContainer = findViewById(R.id.subjectsContainer);
         txtOverallGPA = findViewById(R.id.txtOverallGPA);
         txtGradeStats = findViewById(R.id.txtGradeStats);
@@ -45,7 +53,13 @@ public class GradesOverView extends Activity {
             startActivity(callMain);
             finish();
         });
-
+        btnScanQR.setOnClickListener(view -> {
+            ScanOptions options = new ScanOptions();
+            options.setPrompt("Scan QR Code to Mark Attendance");
+            options.setBeepEnabled(true);
+            options.setBarcodeImageEnabled(true);
+            barcodeLauncher.launch(options);
+        });
         COURSE.setOnClickListener(view -> {
             Intent callMain = new Intent(GradesOverView.this, course.class);
             startActivity(callMain);

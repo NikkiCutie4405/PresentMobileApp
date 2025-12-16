@@ -11,16 +11,31 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 
 public class AttendanceOverview extends Activity {
-    Button HOME, COURSE, GRADES, ATTENDANCE;
+    Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR;
     ImageView PROFILE;
     LinearLayout subjectsContainer;
     TextView txtOverallAttendance, txtPresentDays, txtAbsentDays, txtLateDays, txtTotalDays, txtOverallGrade;
+    private ActivityResultLauncher<ScanOptions> barcodeLauncher;
+    //    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
+    //            new ScanContract(),
+    //            result -> {
+    //                if(result.getContents() != null) {
+    //                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+    //                    markAttendance(result.getContents());
+    //                }
+    //            }
+    //    );
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.attendance_overview);
 
@@ -29,6 +44,7 @@ public class AttendanceOverview extends Activity {
         COURSE = findViewById(R.id.course);
         GRADES = findViewById(R.id.Grades);
         ATTENDANCE = findViewById(R.id.attendance);
+        btnScanQR = findViewById(R.id.scanButton);
         PROFILE = findViewById(R.id.imgLogo);
         subjectsContainer = findViewById(R.id.subjectsContainer);
         txtOverallAttendance = findViewById(R.id.txtOverallAttendance);
@@ -37,7 +53,13 @@ public class AttendanceOverview extends Activity {
         txtLateDays = findViewById(R.id.txtLateDays);
         txtTotalDays = findViewById(R.id.txtTotalDays);
         txtOverallGrade = findViewById(R.id.txtOverallGrade);
-
+        btnScanQR.setOnClickListener(view -> {
+            ScanOptions options = new ScanOptions();
+            options.setPrompt("Scan QR Code to Mark Attendance");
+            options.setBeepEnabled(true);
+            options.setBarcodeImageEnabled(true);
+            barcodeLauncher.launch(options);
+        });
         // Navigation listeners
         PROFILE.setOnClickListener(view -> {
             Intent intent = new Intent(AttendanceOverview.this, setting.class);

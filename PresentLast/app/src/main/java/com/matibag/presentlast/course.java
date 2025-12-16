@@ -14,7 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -22,7 +25,7 @@ import java.util.List;
 
 public class course extends Activity {
     ImageView PROFILE;
-    Button HOME, COURSE, GRADES, ATTENDANCE;
+    Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR;
     LinearLayout coursesContainer;
     Spinner spinnerSemester, spinnerYear;
 
@@ -40,12 +43,21 @@ public class course extends Activity {
 
     // Store all courses data
     private List<CourseData> allCourses = new ArrayList<>();
-
+    private ActivityResultLauncher<ScanOptions> barcodeLauncher;
+    //    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
+    //            new ScanContract(),
+    //            result -> {
+    //                if(result.getContents() != null) {
+    //                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+    //                    markAttendance(result.getContents());
+    //                }
+    //            }
+    //    );
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.courses);
-
+        btnScanQR = findViewById(R.id.scanButton);
         HOME = findViewById(R.id.home);
         COURSE = findViewById(R.id.course); // Initialize COURSE button
         GRADES = findViewById(R.id.Grades);
@@ -60,7 +72,13 @@ public class course extends Activity {
         });
         // Setup spinners with listeners
         setupSpinners();
-
+        btnScanQR.setOnClickListener(view -> {
+            ScanOptions options = new ScanOptions();
+            options.setPrompt("Scan QR Code to Mark Attendance");
+            options.setBeepEnabled(true);
+            options.setBarcodeImageEnabled(true);
+            barcodeLauncher.launch(options);
+        });
         HOME.setOnClickListener(view -> {
             Intent callMainT = new Intent(course.this, home.class);
             startActivity(callMainT);

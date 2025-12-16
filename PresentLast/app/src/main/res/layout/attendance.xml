@@ -127,21 +127,6 @@
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
-
-    <!-- Scanner Button -->
-    <Button
-        android:id="@+id/scanButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#F59E0B"
-        android:textColor="#FFFFFF"
-        android:text="📷 Scan QR Code"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"/>
-
     <!-- Tab Navigation -->
     <LinearLayout
         android:layout_width="match_parent"

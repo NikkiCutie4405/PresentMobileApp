@@ -39,16 +39,6 @@ public class attendance extends AppCompatActivity {
     // Store all attendance data for filtering
     private List<SubjectAttendanceData> allSubjectsAttendance = new ArrayList<>();
 
-    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
-            new ScanContract(),
-            result -> {
-                if(result.getContents() != null) {
-                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                    markAttendance(result.getContents());
-                }
-            }
-    );
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,14 +102,6 @@ public class attendance extends AppCompatActivity {
         // Back button
         btnBack.setOnClickListener(view -> finish());
 
-        // QR Scanner
-        btnScanQR.setOnClickListener(view -> {
-            ScanOptions options = new ScanOptions();
-            options.setPrompt("Scan QR Code to Mark Attendance");
-            options.setBeepEnabled(true);
-            options.setBarcodeImageEnabled(true);
-            barcodeLauncher.launch(options);
-        });
     }
 
     private void setupOverviewMode() {

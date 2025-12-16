@@ -9,7 +9,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 
 import java.text.SimpleDateFormat;
@@ -19,16 +22,25 @@ import java.util.Locale;
 public class home extends Activity {
     TextView tabRecent, tabToday, tabUpcoming;
     ImageView PROFILE;
-    Button HOME, COURSE, GRADES, ATTENDANCE; // Added COURSE button
+    Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR; // Added COURSE button
     LinearLayout updatesContainer;
-
+    private ActivityResultLauncher<ScanOptions> barcodeLauncher;
+    //    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
+    //            new ScanContract(),
+    //            result -> {
+    //                if(result.getContents() != null) {
+    //                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+    //                    markAttendance(result.getContents());
+    //                }
+    //            }
+    //    );
     private String currentTab = "Recent";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
-
+        btnScanQR = findViewById(R.id.scanButton);
         // Initialize views
         tabRecent = findViewById(R.id.tabRecent);
         tabToday = findViewById(R.id.tabToday);

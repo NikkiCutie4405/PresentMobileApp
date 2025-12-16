@@ -250,7 +250,15 @@
             android:text="📚"
             android:textColor="#9CA3AF"
             android:backgroundTint="#2D2D2D"/>
-
+        <Button
+            android:id="@+id/scanButton"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="2"
+            android:text="📷"
+            android:textSize="30dp"
+            android:textColor="#9CA3AF"
+            android:backgroundTint="#F59E0B"/>
         <Button
             android:id="@+id/Grades"
             android:layout_width="0dp"
