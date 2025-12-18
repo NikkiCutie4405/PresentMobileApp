@@ -23,6 +23,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/txtHeaderTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Home"
@@ -31,17 +32,20 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/txtWelcomeMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.8"
+            android:alpha="0.9"
             android:text="Welcome back, Student!"
             android:textColor="#E0E7FF"
             android:textSize="14sp" />
     </LinearLayout>
 
     <TextView
+        android:id="@+id/btnNotifications"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="🔔"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:padding="8dp" />
 </LinearLayout>
