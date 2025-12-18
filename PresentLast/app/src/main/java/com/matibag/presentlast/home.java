@@ -9,15 +9,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.journeyapps.barcodescanner.ScanContract;
+
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class home extends Activity {
     TextView tabRecent, tabToday, tabUpcoming;
@@ -39,7 +35,7 @@ public class home extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home);
+        setContentView(R.layout.activity_home);
         btnScanQR = findViewById(R.id.scanButton);
         // Initialize views
         tabRecent = findViewById(R.id.tabRecent);
@@ -58,7 +54,7 @@ public class home extends Activity {
         });
 
         HOME.setOnClickListener(view -> {
-            // Already on home, no need to restart
+            // Already on activity_home, no need to restart
             // Just refresh if needed
         });
 

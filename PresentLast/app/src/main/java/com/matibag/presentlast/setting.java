@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.matibag.presentlast.ui.LoginActivity;
+
 public class setting extends Activity {
 
     Button PROFILE,LOGOUT;
@@ -29,7 +31,7 @@ public class setting extends Activity {
 
         });
         LOGOUT.setOnClickListener(view -> {
-            Intent callMainT = new Intent(setting.this, Login.class);
+            Intent callMainT = new Intent(setting.this, LoginActivity.class);
             startActivity(callMainT);
             finish();
         });
