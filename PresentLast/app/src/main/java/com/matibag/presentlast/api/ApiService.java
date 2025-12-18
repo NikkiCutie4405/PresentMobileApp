@@ -8,6 +8,8 @@ import com.matibag.presentlast.api.models.StudentSubjectsResponse;
 import com.matibag.presentlast.api.models.SubjectAttendanceDetailResponse;
 import com.matibag.presentlast.api.models.SubjectDetailResponse;
 import com.matibag.presentlast.api.models.SubjectGradesDetailResponse;
+import com.matibag.presentlast.api.models.SubmissionRequest;
+import com.matibag.presentlast.api.models.SubmissionResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
