@@ -53,7 +53,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private String currentTab = "Recent";
     private AuthManager authManager;
-    private StudentInboxResponse.InboxData inboxData;
+
+    // FIX: Changed from InboxData to the main Response class because the JSON is flat
+    private StudentInboxResponse inboxResponse;
 
     private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
             new ScanContract(),
@@ -171,8 +173,9 @@ public class HomeActivity extends AppCompatActivity {
                     setLoading(false);
                     if (response.isSuccessful() && response.body() != null) {
                         StudentInboxResponse res = response.body();
-                        if (res.isSuccess() && res.getData() != null) {
-                            inboxData = res.getData();
+                        // FIX: Logic adjusted to check success directly on the root object
+                        if (res.isSuccess()) {
+                            inboxResponse = res;
                             displayUpdates(currentTab);
                         } else {
                             showError(res.getError() != null ? res.getError() : "Failed to load updates");
@@ -199,10 +202,13 @@ public class HomeActivity extends AppCompatActivity {
     private void displayUpdates(String category) {
         if (updatesContainer == null) return;
         updatesContainer.removeAllViews();
-        if (inboxData == null) { displayNoUpdates(); return; }
+        // FIX: Check inboxResponse instead of inboxData
+        if (inboxResponse == null) { displayNoUpdates(); return; }
 
         boolean hasContent = false;
-        List<StudentInboxResponse.TaskItem> tasks = inboxData.getTasks();
+
+        // Use the helper methods we added to the new Response model
+        List<StudentInboxResponse.TaskItem> tasks = inboxResponse.getTasks();
         if (tasks != null) {
             for (StudentInboxResponse.TaskItem task : tasks) {
                 if (shouldShowTask(task, category)) {
@@ -213,14 +219,17 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         if ("Recent".equals(category)) {
-            if (inboxData.getGrades() != null) {
-                for (StudentInboxResponse.GradeItem grade : inboxData.getGrades()) {
+            List<StudentInboxResponse.GradeItem> grades = inboxResponse.getGrades();
+            if (grades != null) {
+                for (StudentInboxResponse.GradeItem grade : grades) {
                     addGradeCard(grade);
                     hasContent = true;
                 }
             }
-            if (inboxData.getAttendance() != null) {
-                for (StudentInboxResponse.AttendanceItem att : inboxData.getAttendance()) {
+
+            List<StudentInboxResponse.AttendanceItem> attList = inboxResponse.getAttendance();
+            if (attList != null) {
+                for (StudentInboxResponse.AttendanceItem att : attList) {
                     addAttendanceCard(att);
                     hasContent = true;
                 }
@@ -230,11 +239,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private boolean shouldShowTask(StudentInboxResponse.TaskItem task, String category) {
-        String cat = (task.getCategory() != null ? task.getCategory() : "upcoming").toLowerCase();
+        // Updated to use the status or category logic based on your model
         switch (category) {
             case "Recent": return true;
-            case "Today": return "today".equals(cat) || isToday(task.getDueDate());
-            case "Upcoming": return "upcoming".equals(cat) && !task.isSubmitted();
+            case "Today": return isToday(task.getDueDate());
+            case "Upcoming": return !task.isSubmitted() && !task.isOverdue();
             default: return true;
         }
     }
@@ -300,7 +309,8 @@ public class HomeActivity extends AppCompatActivity {
     private void addAttendanceCard(StudentInboxResponse.AttendanceItem att) {
         LinearLayout card = createCardBase();
         TextView title = new TextView(this);
-        title.setText("📅  ATTENDANCE: " + att.getStatus().toUpperCase());
+        // Use getStatus() and getSubjectName() from updated AttendanceItem
+        title.setText("📅  " + att.getSubjectName() + ": " + att.getStatus().toUpperCase());
         title.setTextColor(0xFF3B82F6);
         card.addView(title);
         updatesContainer.addView(card);

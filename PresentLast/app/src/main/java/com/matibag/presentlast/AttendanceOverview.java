@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.ui.HomeActivity;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
@@ -67,7 +68,7 @@ public class AttendanceOverview extends Activity {
         });
 
         HOME.setOnClickListener(view -> {
-            Intent intent = new Intent(AttendanceOverview.this, home.class);
+            Intent intent = new Intent(AttendanceOverview.this, HomeActivity.class);
             startActivity(intent);
             finish();
         });

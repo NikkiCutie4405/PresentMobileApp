@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.ui.HomeActivity;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
@@ -80,7 +81,7 @@ public class course extends Activity {
             barcodeLauncher.launch(options);
         });
         HOME.setOnClickListener(view -> {
-            Intent callMainT = new Intent(course.this, home.class);
+            Intent callMainT = new Intent(course.this, HomeActivity.class);
             startActivity(callMainT);
             finish();
         });

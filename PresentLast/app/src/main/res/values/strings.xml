@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Present!</string>
+    <string name="app_name">Present</string>
+    <string name="welcome_message">Welcome back!</string>
+    <string name="notifications_label">Button for Notifications</string>
 </resources>

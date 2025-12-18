@@ -19,7 +19,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.matibag.presentlast.R;
 import com.matibag.presentlast.api.AuthManager;
 import com.matibag.presentlast.api.LoginResponse;
-import com.matibag.presentlast.home;
+import com.matibag.presentlast.ui.HomeActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -182,7 +182,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(this, home.class);
+        Intent intent = new Intent(this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

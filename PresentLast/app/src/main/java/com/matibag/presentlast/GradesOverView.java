@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.ui.HomeActivity;
 
 import androidx.activity.result.ActivityResultCallerLauncher;
 import androidx.activity.result.ActivityResultLauncher;
@@ -49,7 +50,7 @@ public class GradesOverView extends Activity {
         });
 
         HOME.setOnClickListener(view -> {
-            Intent callMain = new Intent(GradesOverView.this, home.class);
+            Intent callMain = new Intent(GradesOverView.this, HomeActivity.class);
             startActivity(callMain);
             finish();
         });

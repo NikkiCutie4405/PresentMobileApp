@@ -11,6 +11,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import androidx.annotation.Nullable;
 
 import com.matibag.presentlast.api.AuthManager;
+import com.matibag.presentlast.ui.HomeActivity;
 import com.matibag.presentlast.ui.LoginActivity;
 
 public class SplashScreenActivity extends Activity {
@@ -38,7 +39,7 @@ public class SplashScreenActivity extends Activity {
 
             if (auth.isLoggedIn()) {
                 // User is already logged in, go to Dashboard
-                nextActivity = new Intent(SplashScreenActivity.this, home.class);
+                nextActivity = new Intent(SplashScreenActivity.this, HomeActivity.class);
             } else {
                 // No session found, go to Login
                 nextActivity = new Intent(SplashScreenActivity.this, LoginActivity.class);
