@@ -46,7 +46,7 @@ public class CourseActivity extends Activity {
             0xFF8B5CF6  // Violet
     };
 
-    // Store all courses data
+    // Store all activity_courses data
     private List<CourseData> allCourses = new ArrayList<>();
     private ActivityResultLauncher<ScanOptions> barcodeLauncher;
     //    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
@@ -61,7 +61,7 @@ public class CourseActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.courses);
+        setContentView(R.layout.activity_courses);
         btnScanQR = findViewById(R.id.scanButton);
         HOME = findViewById(R.id.home);
         COURSE = findViewById(R.id.course); // Initialize COURSE button
@@ -102,10 +102,10 @@ public class CourseActivity extends Activity {
             finish();
         });
 
-        // Load sample courses data
+        // Load sample activity_courses data
         loadSampleCourses();
 
-        // Display all courses initially
+        // Display all activity_courses initially
         displayCourses("All Semesters", "All Years");
     }
 
@@ -147,7 +147,7 @@ public class CourseActivity extends Activity {
     }
 
     /**
-     * Load sample courses with semester and year data
+     * Load sample activity_courses with semester and year data
      * TODO: Replace with actual database query
      */
     private void loadSampleCourses() {
@@ -163,7 +163,7 @@ public class CourseActivity extends Activity {
     }
 
     /**
-     * Filter courses based on selected semester and year
+     * Filter activity_courses based on selected semester and year
      */
     private void filterCourses() {
         String selectedSemester = spinnerSemester.getSelectedItem().toString();
@@ -173,7 +173,7 @@ public class CourseActivity extends Activity {
     }
 
     /**
-     * Display courses filtered by semester and year
+     * Display activity_courses filtered by semester and year
      */
     private void displayCourses(String semester, String year) {
         coursesContainer.removeAllViews();
@@ -194,10 +194,10 @@ public class CourseActivity extends Activity {
             }
         }
 
-        // Show message if no courses found
+        // Show message if no activity_courses found
         if (displayedCount == 0) {
             TextView emptyText = new TextView(this);
-            emptyText.setText("No courses found for selected filters");
+            emptyText.setText("No activity_courses found for selected filters");
             emptyText.setTextColor(0xFF9CA3AF);
             emptyText.setTextSize(16);
             emptyText.setGravity(Gravity.CENTER);
