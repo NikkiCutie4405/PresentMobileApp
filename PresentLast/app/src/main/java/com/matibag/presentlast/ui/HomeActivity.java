@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -25,8 +24,9 @@ import com.matibag.presentlast.R;
 import com.matibag.presentlast.SubmissionPage;
 import com.matibag.presentlast.api.ApiClient;
 import com.matibag.presentlast.api.AuthManager;
+import com.matibag.presentlast.api.QRAttendanceHelper;
+import com.matibag.presentlast.api.models.QRValidateResponse;
 import com.matibag.presentlast.api.models.StudentInboxResponse;
-import com.matibag.presentlast.course;
 import com.matibag.presentlast.setting;
 
 import java.text.ParseException;
@@ -53,15 +53,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private String currentTab = "Recent";
     private AuthManager authManager;
-
-    // FIX: Changed from InboxData to the main Response class because the JSON is flat
     private StudentInboxResponse inboxResponse;
 
     private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
             new ScanContract(),
             result -> {
                 if (result.getContents() != null) {
-                    Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
                     markAttendance(result.getContents());
                 }
             }
@@ -113,7 +110,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupNavigation() {
         if (btnHome != null) btnHome.setOnClickListener(v -> loadInboxData());
-        if (btnCourse != null) btnCourse.setOnClickListener(v -> startActivity(new Intent(this, course.class)));
+        if (btnCourse != null) btnCourse.setOnClickListener(v -> startActivity(new Intent(this, CourseActivity.class)));
         if (btnGrades != null) btnGrades.setOnClickListener(v -> startActivity(new Intent(this, GradesOverView.class)));
         if (btnAttendance != null) btnAttendance.setOnClickListener(v -> startActivity(new Intent(this, AttendanceOverview.class)));
         if (btnScanQR != null) {
@@ -127,6 +124,130 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
     }
+
+    // ============================================================
+    // ATTENDANCE LOGIC
+    // ============================================================
+
+    private void markAttendance(String qrContent) {
+        int studentId = authManager.getCurrentUserId();
+        if (studentId == -1) {
+            showError("Session expired");
+            return;
+        }
+
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Validating QR code...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        QRAttendanceHelper.validateQRToken(qrContent, new QRAttendanceHelper.ValidateCallback() {
+            @Override
+            public void onValid(QRValidateResponse.SessionInfo session, String willBeMarkedAs) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showAttendanceConfirmDialog(qrContent, session, willBeMarkedAs, studentId);
+                });
+            }
+
+            @Override
+            public void onExpired() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("This QR code has expired");
+                });
+            }
+
+            @Override
+            public void onInvalid(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+        });
+    }
+
+    private void showAttendanceConfirmDialog(String qrContent, QRValidateResponse.SessionInfo session,
+                                             String willBeMarkedAs, int studentId) {
+        String subjectInfo = (session.getSubjectCode() != null)
+                ? session.getSubjectCode() + " - " + session.getSubjectName()
+                : session.getSubjectName();
+
+        String statusText = "present".equals(willBeMarkedAs) ? "Present ✓" : "Late ⏰";
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Mark Attendance")
+                .setMessage("Subject: " + subjectInfo + "\n" +
+                        "Date: " + session.getDate() + "\n" +
+                        "Time: " + session.getTime() + "\n\n" +
+                        "You will be marked as: " + statusText)
+                .setPositiveButton("Confirm", (dialog, which) -> confirmAttendance(qrContent, studentId))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmAttendance(String qrContent, int studentId) {
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Processing...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        QRAttendanceHelper.markAttendance(qrContent, studentId, new QRAttendanceHelper.MarkCallback() {
+            @Override
+            public void onSuccess(String status, String message, boolean alreadyMarked) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    String title = alreadyMarked ? "Already Marked" : "Attendance Marked";
+                    String icon = "present".equals(status) ? "✓" : "⏰";
+
+                    new androidx.appcompat.app.AlertDialog.Builder(HomeActivity.this)
+                            .setTitle(title)
+                            .setMessage(icon + " " + message)
+                            .setPositiveButton("OK", null)
+                            .show();
+
+                    loadInboxData(); // Refresh the home feed
+                });
+            }
+
+            @Override
+            public void onNotEnrolled() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("You are not enrolled in this subject");
+                });
+            }
+
+            @Override
+            public void onExpired() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("This QR code has expired");
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+        });
+    }
+
+    // ============================================================
+    // UI & DATA LOADING (TABS, INBOX, UTILS)
+    // ============================================================
 
     private void setupTabs() {
         if (tabRecent != null) tabRecent.setOnClickListener(v -> handleTabClick(tabRecent, "Recent"));
@@ -161,10 +282,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private void loadInboxData() {
         int studentId = authManager.getCurrentUserId();
-        if (studentId == -1) {
-            navigateToLogin();
-            return;
-        }
+        if (studentId == -1) { navigateToLogin(); return; }
+
         setLoading(true);
         ApiClient.getApiService().getStudentInbox(studentId, 30).enqueue(new Callback<StudentInboxResponse>() {
             @Override
@@ -173,16 +292,14 @@ public class HomeActivity extends AppCompatActivity {
                     setLoading(false);
                     if (response.isSuccessful() && response.body() != null) {
                         StudentInboxResponse res = response.body();
-                        // FIX: Logic adjusted to check success directly on the root object
                         if (res.isSuccess()) {
                             inboxResponse = res;
                             displayUpdates(currentTab);
                         } else {
-                            showError(res.getError() != null ? res.getError() : "Failed to load updates");
+                            showError(res.getError());
                             displayNoUpdates();
                         }
                     } else {
-                        showError("Server Error " + response.code());
                         displayNoUpdates();
                     }
                 });
@@ -192,7 +309,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<StudentInboxResponse> call, @NonNull Throwable t) {
                 runOnUiThread(() -> {
                     setLoading(false);
-                    showError(t instanceof java.net.UnknownHostException ? "No internet" : "Connection error");
                     displayNoUpdates();
                 });
             }
@@ -202,12 +318,9 @@ public class HomeActivity extends AppCompatActivity {
     private void displayUpdates(String category) {
         if (updatesContainer == null) return;
         updatesContainer.removeAllViews();
-        // FIX: Check inboxResponse instead of inboxData
         if (inboxResponse == null) { displayNoUpdates(); return; }
 
         boolean hasContent = false;
-
-        // Use the helper methods we added to the new Response model
         List<StudentInboxResponse.TaskItem> tasks = inboxResponse.getTasks();
         if (tasks != null) {
             for (StudentInboxResponse.TaskItem task : tasks) {
@@ -219,17 +332,14 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         if ("Recent".equals(category)) {
-            List<StudentInboxResponse.GradeItem> grades = inboxResponse.getGrades();
-            if (grades != null) {
-                for (StudentInboxResponse.GradeItem grade : grades) {
+            if (inboxResponse.getGrades() != null) {
+                for (StudentInboxResponse.GradeItem grade : inboxResponse.getGrades()) {
                     addGradeCard(grade);
                     hasContent = true;
                 }
             }
-
-            List<StudentInboxResponse.AttendanceItem> attList = inboxResponse.getAttendance();
-            if (attList != null) {
-                for (StudentInboxResponse.AttendanceItem att : attList) {
+            if (inboxResponse.getAttendance() != null) {
+                for (StudentInboxResponse.AttendanceItem att : inboxResponse.getAttendance()) {
                     addAttendanceCard(att);
                     hasContent = true;
                 }
@@ -239,7 +349,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private boolean shouldShowTask(StudentInboxResponse.TaskItem task, String category) {
-        // Updated to use the status or category logic based on your model
         switch (category) {
             case "Recent": return true;
             case "Today": return isToday(task.getDueDate());
@@ -309,7 +418,6 @@ public class HomeActivity extends AppCompatActivity {
     private void addAttendanceCard(StudentInboxResponse.AttendanceItem att) {
         LinearLayout card = createCardBase();
         TextView title = new TextView(this);
-        // Use getStatus() and getSubjectName() from updated AttendanceItem
         title.setText("📅  " + att.getSubjectName() + ": " + att.getStatus().toUpperCase());
         title.setTextColor(0xFF3B82F6);
         card.addView(title);
@@ -358,10 +466,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void showError(String msg) {
         if (msg != null) Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private void markAttendance(String qr) {
-        Toast.makeText(this, "Processing attendance for: " + qr, Toast.LENGTH_SHORT).show();
     }
 
     private void navigateToLogin() {

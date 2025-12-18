@@ -10,13 +10,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.ui.CourseActivity;
 import com.matibag.presentlast.ui.HomeActivity;
 
-import androidx.activity.result.ActivityResultCallerLauncher;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 
@@ -62,7 +60,7 @@ public class GradesOverView extends Activity {
             barcodeLauncher.launch(options);
         });
         COURSE.setOnClickListener(view -> {
-            Intent callMain = new Intent(GradesOverView.this, course.class);
+            Intent callMain = new Intent(GradesOverView.this, CourseActivity.class);
             startActivity(callMain);
             finish();
         });

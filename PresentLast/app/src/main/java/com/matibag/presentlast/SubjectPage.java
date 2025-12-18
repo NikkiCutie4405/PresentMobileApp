@@ -42,7 +42,7 @@ public class SubjectPage extends Activity {
         tabGrades = findViewById(R.id.tabGrades);
         tasksContainer = findViewById(R.id.tasksContainer);
 
-        // Get course info from intent
+        // Get CourseActivity info from intent
         courseId = getIntent().getIntExtra("courseId", -1);
         courseName = getIntent().getStringExtra("courseName");
         courseCode = getIntent().getStringExtra("courseCode");

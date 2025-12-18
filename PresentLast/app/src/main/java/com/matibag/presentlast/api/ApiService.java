@@ -1,22 +1,11 @@
 package com.matibag.presentlast.api;
 
-import com.matibag.presentlast.api.models.StudentAttendanceResponse;
-import com.matibag.presentlast.api.models.StudentGradesResponse;
-import com.matibag.presentlast.api.models.StudentInboxResponse;
-import com.matibag.presentlast.api.models.StudentProfileResponse;
-import com.matibag.presentlast.api.models.StudentSubjectsResponse;
-import com.matibag.presentlast.api.models.SubjectAttendanceDetailResponse;
-import com.matibag.presentlast.api.models.SubjectDetailResponse;
-import com.matibag.presentlast.api.models.SubjectGradesDetailResponse;
-import com.matibag.presentlast.api.models.SubmissionRequest;
-import com.matibag.presentlast.api.models.SubmissionResponse;
+import com.matibag.presentlast.api.models.*;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 public interface ApiService {
 
@@ -52,7 +41,7 @@ public interface ApiService {
     );
 
     // ============================================================
-    // STUDENT INBOX (Tasks, Grades, Attendance updates)
+    // STUDENT INBOX
     // ============================================================
 
     @GET("api/student/inbox")
@@ -96,9 +85,41 @@ public interface ApiService {
     );
 
     // ============================================================
+    // QR ATTENDANCE
+    // ============================================================
+
+    @GET("api/attendance/qr")
+    Call<QRValidateResponse> validateQRToken(@Query("token") String token);
+
+    @PUT("api/attendance/qr")
+    Call<QRMarkAttendanceResponse> markQRAttendance(@Body QRMarkAttendanceRequest request);
+
+    // ============================================================
+    // FILE UPLOAD (R2 STORAGE)
+    // ============================================================
+
+    @GET("api/upload")
+    Call<UploadStatusResponse> getUploadStatus();
+
+    @Multipart
+    @POST("api/upload")
+    Call<FileUploadResponse> uploadFile(
+            @Part MultipartBody.Part file,
+            @Part("folder") RequestBody folder,
+            @Part("studentId") RequestBody studentId,
+            @Part("submissionId") RequestBody submissionId
+    );
+
+    // ============================================================
     // STUDENT SUBMISSIONS
     // ============================================================
 
     @POST("api/student/submissions")
     Call<SubmissionResponse> submitAssignment(@Body SubmissionRequest request);
+
+    @GET("api/student/submissions")
+    Call<StudentSubmissionResponse> getStudentSubmission(
+            @Query("submissionId") int submissionId,
+            @Query("studentId") int studentId
+    );
 }

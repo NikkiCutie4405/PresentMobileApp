@@ -59,7 +59,7 @@ public class attendance extends AppCompatActivity {
         spinnerSemester = findViewById(R.id.spinnerSemester);
         spinnerYear = findViewById(R.id.spinnerYear);
 
-        // Get course data
+        // Get CourseActivity data
         courseId = getIntent().getIntExtra("courseId", -1);
         courseName = getIntent().getStringExtra("courseName");
         courseCode = getIntent().getStringExtra("courseCode");

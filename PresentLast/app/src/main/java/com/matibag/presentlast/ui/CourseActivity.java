@@ -1,4 +1,4 @@
-package com.matibag.presentlast;
+package com.matibag.presentlast.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,9 +14,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.journeyapps.barcodescanner.ScanContract;
+
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.matibag.presentlast.ui.HomeActivity;
+import com.matibag.presentlast.AttendanceOverview;
+import com.matibag.presentlast.GradesOverView;
+import com.matibag.presentlast.R;
+import com.matibag.presentlast.SubjectPage;
+import com.matibag.presentlast.setting;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
@@ -24,13 +28,13 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class course extends Activity {
+public class CourseActivity extends Activity {
     ImageView PROFILE;
     Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR;
     LinearLayout coursesContainer;
     Spinner spinnerSemester, spinnerYear;
 
-    // Array of vibrant colors for course cards
+    // Array of vibrant colors for CourseActivity cards
     private final int[] cardColors = {
             0xFF2563EB, // Blue
             0xFF9333EA, // Purple
@@ -68,7 +72,7 @@ public class course extends Activity {
         spinnerYear = findViewById(R.id.spinnerYear);
         PROFILE = findViewById(R.id.imgLogo);
         PROFILE.setOnClickListener(view -> {
-            Intent callMainT = new Intent(course.this, setting.class);
+            Intent callMainT = new Intent(CourseActivity.this, setting.class);
             startActivity(callMainT);
         });
         // Setup spinners with listeners
@@ -81,19 +85,19 @@ public class course extends Activity {
             barcodeLauncher.launch(options);
         });
         HOME.setOnClickListener(view -> {
-            Intent callMainT = new Intent(course.this, HomeActivity.class);
+            Intent callMainT = new Intent(CourseActivity.this, HomeActivity.class);
             startActivity(callMainT);
             finish();
         });
 
         GRADES.setOnClickListener(view -> {
-            Intent callMainT = new Intent(course.this, GradesOverView.class);
+            Intent callMainT = new Intent(CourseActivity.this, GradesOverView.class);
             startActivity(callMainT);
             finish();
         });
 
         ATTENDANCE.setOnClickListener(view -> {
-            Intent callMainT = new Intent(course.this, AttendanceOverview.class);
+            Intent callMainT = new Intent(CourseActivity.this, AttendanceOverview.class);
             startActivity(callMainT);
             finish();
         });
@@ -178,7 +182,7 @@ public class course extends Activity {
         int displayedCount = 0;
 
         for (CourseData courseData : allCourses) {
-            // Check if course matches filter criteria
+            // Check if CourseActivity matches filter criteria
             boolean semesterMatch = semester.equals("All Semesters") || courseData.semester.equals(semester);
             boolean yearMatch = year.equals("All Years") || courseData.year.equals(year);
 
@@ -227,7 +231,7 @@ public class course extends Activity {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
-        // Left side (course info)
+        // Left side (CourseActivity info)
         LinearLayout courseInfo = new LinearLayout(this);
         courseInfo.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
@@ -350,7 +354,7 @@ public class course extends Activity {
 
         // Set click listener to open subject page with tabs
         card.setOnClickListener(view -> {
-            Intent intent = new Intent(course.this, SubjectPage.class);
+            Intent intent = new Intent(CourseActivity.this, SubjectPage.class);
             intent.putExtra("courseId", courseData.courseId);
             intent.putExtra("courseName", courseData.courseName);
             intent.putExtra("courseCode", courseData.courseCode);
@@ -368,7 +372,7 @@ public class course extends Activity {
     }
 
     /**
-     * Inner class to store course data
+     * Inner class to store CourseActivity data
      */
     private class CourseData {
         int courseId;

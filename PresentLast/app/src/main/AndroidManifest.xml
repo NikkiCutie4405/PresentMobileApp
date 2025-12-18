@@ -44,7 +44,7 @@
             android:configChanges="orientation|screenSize" />
 
         <activity android:name=".setting" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".course" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.CourseActivity" android:exported="false" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
         <activity android:name=".attendance" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
         <activity android:name=".inbox" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
         <activity android:name=".compose" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />

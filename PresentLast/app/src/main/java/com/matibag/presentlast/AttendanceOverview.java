@@ -11,8 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.ui.CourseActivity;
 import com.matibag.presentlast.ui.HomeActivity;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -74,7 +74,7 @@ public class AttendanceOverview extends Activity {
         });
 
         COURSE.setOnClickListener(view -> {
-            Intent intent = new Intent(AttendanceOverview.this, course.class);
+            Intent intent = new Intent(AttendanceOverview.this, CourseActivity.class);
             startActivity(intent);
             finish();
         });
