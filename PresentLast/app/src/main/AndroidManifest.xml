@@ -82,7 +82,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".AttendanceOverview"
+            android:name=".ui.AttendanceOverviewActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
 

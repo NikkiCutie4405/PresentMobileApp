@@ -27,7 +27,7 @@ import com.matibag.presentlast.api.ApiClient;
 import com.matibag.presentlast.api.AuthManager;
 import com.matibag.presentlast.api.QRAttendanceHelper;
 import com.matibag.presentlast.api.models.QRValidateResponse;
-import com.matibag.presentlast.api.models.StudentGradesResponse;
+import com.matibag.presentlast.api.models.StudentAttendanceResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +36,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class GradesOverviewActivity extends AppCompatActivity {
+public class AttendanceOverviewActivity extends AppCompatActivity {
 
-    private static final String TAG = "GradesOverviewActivity";
+    private static final String TAG = "AttendanceOverviewActivity";
 
     // Header views
     private ImageView imgLogo;
     private TextView txtSubtitle;
 
     // Stats views
-    private TextView txtAverageGrade, txtSubjectsCount, txtGradedCount;
+    private TextView txtOverallAttendance, txtPresentCount, txtLateCount, txtAbsentCount, txtOverallGrade;
 
     // Filter views
     private Spinner spinnerSemester, spinnerYear;
@@ -59,7 +59,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
 
     // Data
     private AuthManager authManager;
-    private StudentGradesResponse gradesResponse;
+    private StudentAttendanceResponse attendanceResponse;
     private String currentSemester = "";
     private String currentYear = "";
 
@@ -76,7 +76,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_grades_overview);
+        setContentView(R.layout.activity_attendance_overview);
 
         authManager = AuthManager.getInstance(this);
 
@@ -89,7 +89,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
         setupHeader();
         setupNavigation();
         setupSpinners();
-        loadGradesData();
+        loadAttendanceData();
     }
 
     // ============================================================
@@ -102,9 +102,11 @@ public class GradesOverviewActivity extends AppCompatActivity {
         txtSubtitle = findViewById(R.id.txtSubtitle);
 
         // Stats
-        txtAverageGrade = findViewById(R.id.txtAverageGrade);
-        txtSubjectsCount = findViewById(R.id.txtSubjectsCount);
-        txtGradedCount = findViewById(R.id.txtGradedCount);
+        txtOverallAttendance = findViewById(R.id.txtOverallAttendance);
+        txtPresentCount = findViewById(R.id.txtPresentCount);
+        txtLateCount = findViewById(R.id.txtLateCount);
+        txtAbsentCount = findViewById(R.id.txtAbsentCount);
+        txtOverallGrade = findViewById(R.id.txtOverallGrade);
 
         // Filters
         spinnerSemester = findViewById(R.id.spinnerSemester);
@@ -129,14 +131,14 @@ public class GradesOverviewActivity extends AppCompatActivity {
         // Update subtitle with user name
         String fullName = authManager.getCurrentFullName();
         if (txtSubtitle != null && fullName != null) {
-            txtSubtitle.setText("Track your grades, " + fullName);
+            txtSubtitle.setText("Track your attendance, " + fullName);
         }
     }
 
     private void setupNavigation() {
-        // Highlight Grades tab as active
-        if (btnGrades != null) {
-            ViewCompat.setBackgroundTintList(btnGrades,
+        // Highlight Attendance tab as active
+        if (btnAttendance != null) {
+            ViewCompat.setBackgroundTintList(btnAttendance,
                     android.content.res.ColorStateList.valueOf(0xFF2563EB));
         }
 
@@ -156,15 +158,15 @@ public class GradesOverviewActivity extends AppCompatActivity {
 
         if (btnGrades != null) {
             btnGrades.setOnClickListener(v -> {
-                // Already on grades - refresh
-                loadGradesData();
+                startActivity(new Intent(this, GradesOverviewActivity.class));
+                finish();
             });
         }
 
         if (btnAttendance != null) {
             btnAttendance.setOnClickListener(v -> {
-                startActivity(new Intent(this, AttendanceOverviewActivity.class));
-                finish();
+                // Already on attendance - refresh
+                loadAttendanceData();
             });
         }
 
@@ -181,7 +183,6 @@ public class GradesOverviewActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // Default values
         String[] defaultSemesters = {"All Semesters"};
         String[] defaultYears = {"All Years"};
 
@@ -201,7 +202,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
                 String selected = parent.getItemAtPosition(position).toString();
                 if (!selected.equals(currentSemester)) {
                     currentSemester = selected.equals("All Semesters") ? "" : selected;
-                    loadGradesData();
+                    loadAttendanceData();
                 }
             }
             @Override
@@ -214,7 +215,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
                 String selected = parent.getItemAtPosition(position).toString();
                 if (!selected.equals(currentYear)) {
                     currentYear = selected.equals("All Years") ? "" : selected;
-                    loadGradesData();
+                    loadAttendanceData();
                 }
             }
             @Override
@@ -226,7 +227,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
     // API DATA LOADING
     // ============================================================
 
-    private void loadGradesData() {
+    private void loadAttendanceData() {
         int studentId = authManager.getCurrentUserId();
         if (studentId == -1) {
             navigateToLogin();
@@ -235,17 +236,17 @@ public class GradesOverviewActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        ApiClient.getApiService().getStudentGrades(studentId, currentSemester, currentYear)
-                .enqueue(new Callback<StudentGradesResponse>() {
+        ApiClient.getApiService().getStudentAttendance(studentId, currentSemester, currentYear)
+                .enqueue(new Callback<StudentAttendanceResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<StudentGradesResponse> call,
-                                           @NonNull Response<StudentGradesResponse> response) {
+                    public void onResponse(@NonNull Call<StudentAttendanceResponse> call,
+                                           @NonNull Response<StudentAttendanceResponse> response) {
                         runOnUiThread(() -> {
                             setLoading(false);
                             if (response.isSuccessful() && response.body() != null) {
-                                StudentGradesResponse res = response.body();
+                                StudentAttendanceResponse res = response.body();
                                 if (res.isSuccess()) {
-                                    gradesResponse = res;
+                                    attendanceResponse = res;
                                     updateSpinnersFromResponse();
                                     updateStatsDisplay();
                                     displaySubjects();
@@ -254,14 +255,14 @@ public class GradesOverviewActivity extends AppCompatActivity {
                                     displayNoSubjects();
                                 }
                             } else {
-                                showError("Failed to load grades");
+                                showError("Failed to load attendance");
                                 displayNoSubjects();
                             }
                         });
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<StudentGradesResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<StudentAttendanceResponse> call, @NonNull Throwable t) {
                         runOnUiThread(() -> {
                             setLoading(false);
                             showError("Connection error: " + t.getMessage());
@@ -272,9 +273,9 @@ public class GradesOverviewActivity extends AppCompatActivity {
     }
 
     private void updateSpinnersFromResponse() {
-        if (gradesResponse == null) return;
+        if (attendanceResponse == null) return;
 
-        List<String> semesters = gradesResponse.getSemesters();
+        List<String> semesters = attendanceResponse.getSemesters();
         if (semesters != null && !semesters.isEmpty()) {
             List<String> semesterList = new ArrayList<>();
             semesterList.add("All Semesters");
@@ -286,7 +287,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
             spinnerSemester.setAdapter(adapter);
         }
 
-        List<String> years = gradesResponse.getYears();
+        List<String> years = attendanceResponse.getYears();
         if (years != null && !years.isEmpty()) {
             List<String> yearList = new ArrayList<>();
             yearList.add("All Years");
@@ -300,37 +301,38 @@ public class GradesOverviewActivity extends AppCompatActivity {
     }
 
     private void updateStatsDisplay() {
-        if (gradesResponse == null) return;
+        if (attendanceResponse == null) return;
 
-        List<StudentGradesResponse.SubjectGrade> subjects = gradesResponse.getSubjects();
+        List<StudentAttendanceResponse.SubjectAttendance> subjects = attendanceResponse.getSubjects();
         if (subjects != null && !subjects.isEmpty()) {
-            double totalGrade = 0;
-            int gradedCount = 0;
-            int totalGradedTasks = 0;
+            int totalPresent = 0, totalLate = 0, totalAbsent = 0, totalSessions = 0;
 
-            for (StudentGradesResponse.SubjectGrade subject : subjects) {
-                if (subject.getAverageGrade() != null) {
-                    totalGrade += subject.getAverageGrade();
-                    gradedCount++;
-                }
-                totalGradedTasks += subject.getGradedCount();
+            for (StudentAttendanceResponse.SubjectAttendance subject : subjects) {
+                totalPresent += subject.getPresentCount();
+                totalLate += subject.getLateCount();
+                totalAbsent += subject.getAbsentCount();
+                totalSessions += subject.getTotalSessions();
             }
 
-            if (gradedCount > 0) {
-                double average = totalGrade / gradedCount;
-                txtAverageGrade.setText(String.format("%.0f", average));
-                txtAverageGrade.setTextColor(getGradeColor((int) average));
-            } else {
-                txtAverageGrade.setText("--");
-                txtAverageGrade.setTextColor(0xFF94A3B8);
-            }
+            int attended = totalPresent + totalLate;
+            int percentage = totalSessions > 0 ? (attended * 100) / totalSessions : 0;
+            txtOverallAttendance.setText(percentage + "%");
+            txtOverallAttendance.setTextColor(getGradeColor(percentage));
 
-            txtSubjectsCount.setText(String.valueOf(subjects.size()));
-            txtGradedCount.setText(String.valueOf(totalGradedTasks));
+            txtPresentCount.setText(String.valueOf(totalPresent));
+            txtLateCount.setText(String.valueOf(totalLate));
+            txtAbsentCount.setText(String.valueOf(totalAbsent));
+
+            double gradePoints = (totalPresent * 100.0) + (totalLate * 50.0);
+            double attendanceGrade = totalSessions > 0 ? gradePoints / totalSessions : 0;
+            txtOverallGrade.setText(String.format("%.1f%%", attendanceGrade));
+            txtOverallGrade.setTextColor(getGradeColor((int) attendanceGrade));
         } else {
-            txtAverageGrade.setText("--");
-            txtSubjectsCount.setText("0");
-            txtGradedCount.setText("0");
+            txtOverallAttendance.setText("--");
+            txtPresentCount.setText("0");
+            txtLateCount.setText("0");
+            txtAbsentCount.setText("0");
+            txtOverallGrade.setText("--");
         }
     }
 
@@ -338,18 +340,18 @@ public class GradesOverviewActivity extends AppCompatActivity {
         if (subjectsContainer == null) return;
         subjectsContainer.removeAllViews();
 
-        if (gradesResponse == null || gradesResponse.getSubjects() == null ||
-                gradesResponse.getSubjects().isEmpty()) {
+        if (attendanceResponse == null || attendanceResponse.getSubjects() == null ||
+                attendanceResponse.getSubjects().isEmpty()) {
             displayNoSubjects();
             return;
         }
 
-        for (StudentGradesResponse.SubjectGrade subject : gradesResponse.getSubjects()) {
-            addSubjectGradeCard(subject);
+        for (StudentAttendanceResponse.SubjectAttendance subject : attendanceResponse.getSubjects()) {
+            addSubjectAttendanceCard(subject);
         }
     }
 
-    private void addSubjectGradeCard(StudentGradesResponse.SubjectGrade subject) {
+    private void addSubjectAttendanceCard(StudentAttendanceResponse.SubjectAttendance subject) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setBackgroundColor(0xFF1E293B);
@@ -365,96 +367,152 @@ public class GradesOverviewActivity extends AppCompatActivity {
         card.setClickable(true);
         card.setFocusable(true);
 
+        // Top row:  Course info and percentage
         LinearLayout topRow = new LinearLayout(this);
         topRow.setOrientation(LinearLayout.HORIZONTAL);
         topRow.setGravity(Gravity.CENTER_VERTICAL);
         topRow.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout. LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
+        // Left:  Course info
         LinearLayout courseInfo = new LinearLayout(this);
         courseInfo.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+        LinearLayout.LayoutParams infoParams = new LinearLayout. LayoutParams(0, LinearLayout.LayoutParams. WRAP_CONTENT, 1);
         courseInfo.setLayoutParams(infoParams);
 
         TextView txtCourseName = new TextView(this);
         txtCourseName.setText(subject.getName());
         txtCourseName.setTextColor(Color.WHITE);
         txtCourseName.setTextSize(18);
-        txtCourseName.setTypeface(null, Typeface.BOLD);
+        txtCourseName. setTypeface(null, Typeface. BOLD);
         courseInfo.addView(txtCourseName);
 
-        TextView txtCourseInfoText = new TextView(this);
-        String info = (subject.getCode() != null ? subject.getCode() : "") +
-                (subject.getInstructors() != null ? " • " + subject.getInstructors() : "");
-        txtCourseInfoText.setText(info);
-        txtCourseInfoText.setTextColor(0xFF94A3B8);
-        txtCourseInfoText.setTextSize(14);
-        LinearLayout.LayoutParams infoTextParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        infoTextParams.setMargins(0, dpToPx(4), 0, 0);
-        txtCourseInfoText.setLayoutParams(infoTextParams);
-        courseInfo.addView(txtCourseInfoText);
+        // Course code only (no instructors available in this model)
+        if (subject.getCode() != null) {
+            TextView txtCourseCode = new TextView(this);
+            txtCourseCode.setText(subject.getCode());
+            txtCourseCode. setTextColor(0xFF94A3B8);
+            txtCourseCode.setTextSize(14);
+            LinearLayout.LayoutParams codeParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams. WRAP_CONTENT, LinearLayout.LayoutParams. WRAP_CONTENT);
+            codeParams.setMargins(0, dpToPx(4), 0, 0);
+            txtCourseCode.setLayoutParams(codeParams);
+            courseInfo.addView(txtCourseCode);
+        }
 
         topRow.addView(courseInfo);
 
-        TextView txtGrade = new TextView(this);
-        if (subject.getAverageGrade() != null) {
-            int avg = subject.getAverageGrade().intValue();
-            txtGrade.setText(String.valueOf(avg));
-            txtGrade.setTextColor(getGradeColor(avg));
-        } else {
-            txtGrade.setText("--");
-            txtGrade.setTextColor(0xFF6B7280);
-        }
-        txtGrade.setTextSize(40);
-        txtGrade.setTypeface(null, Typeface.BOLD);
-        topRow.addView(txtGrade);
+        // Right: Attendance percentage and grade
+        LinearLayout rightSection = new LinearLayout(this);
+        rightSection.setOrientation(LinearLayout.VERTICAL);
+        rightSection.setGravity(Gravity.END);
 
+        int percentage = subject.getAttendanceRate();
+        TextView txtPercentage = new TextView(this);
+        txtPercentage.setText(percentage + "%");
+        txtPercentage.setTextSize(36);
+        txtPercentage. setTypeface(null, Typeface. BOLD);
+        txtPercentage.setTextColor(getGradeColor(percentage));
+        rightSection.addView(txtPercentage);
+
+        // Calculate grade
+        int present = subject.getPresentCount();
+        int late = subject.getLateCount();
+        int total = subject.getTotalSessions();
+        double attendanceGrade = total > 0 ? ((present * 100.0) + (late * 50.0)) / total : 0;
+
+        TextView txtGrade = new TextView(this);
+        txtGrade.setText(String.format("%.0f%%", attendanceGrade));
+        txtGrade.setTextColor(getGradeColor((int) attendanceGrade));
+        txtGrade.setTextSize(14);
+        txtGrade.setTypeface(null, Typeface.BOLD);
+        rightSection.addView(txtGrade);
+
+        topRow.addView(rightSection);
         card.addView(topRow);
 
+        // Stats row
         LinearLayout statsRow = new LinearLayout(this);
         statsRow.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams statsParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams. WRAP_CONTENT);
         statsParams.setMargins(0, dpToPx(12), 0, 0);
         statsRow.setLayoutParams(statsParams);
 
-        TextView txtTasks = new TextView(this);
-        txtTasks.setText("📋 " + subject.getGradedCount() + "/" + subject.getTotalTasks() + " graded");
-        txtTasks.setTextColor(0xFF94A3B8);
-        txtTasks.setTextSize(13);
-        statsRow.addView(txtTasks);
+        // Present
+        TextView txtPresent = new TextView(this);
+        txtPresent.setText("✓ " + present);
+        txtPresent.setTextColor(0xFF10B981);
+        txtPresent.setTextSize(13);
+        LinearLayout.LayoutParams presentParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        presentParams.setMargins(0, 0, dpToPx(16), 0);
+        txtPresent.setLayoutParams(presentParams);
+        statsRow.addView(txtPresent);
 
-        if (subject.getSemesterName() != null) {
-            TextView txtSemester = new TextView(this);
-            txtSemester.setText(" • " + subject.getSemesterName());
-            txtSemester.setTextColor(0xFF64748B);
-            txtSemester.setTextSize(13);
-            statsRow.addView(txtSemester);
+        // Late
+        TextView txtLate = new TextView(this);
+        txtLate.setText("⚠ " + late);
+        txtLate.setTextColor(0xFFFFA500);
+        txtLate.setTextSize(13);
+        LinearLayout.LayoutParams lateParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams. WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lateParams.setMargins(0, 0, dpToPx(16), 0);
+        txtLate.setLayoutParams(lateParams);
+        statsRow.addView(txtLate);
+
+        // Absent
+        TextView txtAbsent = new TextView(this);
+        txtAbsent.setText("✗ " + subject.getAbsentCount());
+        txtAbsent.setTextColor(0xFFEF4444);
+        txtAbsent.setTextSize(13);
+        LinearLayout.LayoutParams absentParams = new LinearLayout.LayoutParams(
+                LinearLayout. LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams. WRAP_CONTENT);
+        absentParams.setMargins(0, 0, dpToPx(16), 0);
+        txtAbsent.setLayoutParams(absentParams);
+        statsRow.addView(txtAbsent);
+
+        // Excused (if any)
+        if (subject.getExcusedCount() > 0) {
+            TextView txtExcused = new TextView(this);
+            txtExcused.setText("📋 " + subject.getExcusedCount());
+            txtExcused.setTextColor(0xFF3B82F6);
+            txtExcused. setTextSize(13);
+            LinearLayout.LayoutParams excusedParams = new LinearLayout. LayoutParams(
+                    LinearLayout. LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            excusedParams.setMargins(0, 0, dpToPx(16), 0);
+            txtExcused. setLayoutParams(excusedParams);
+            statsRow.addView(txtExcused);
         }
+
+        // Total
+        TextView txtTotal = new TextView(this);
+        txtTotal.setText("Total: " + total);
+        txtTotal.setTextColor(0xFF94A3B8);
+        txtTotal.setTextSize(13);
+        statsRow.addView(txtTotal);
 
         card.addView(statsRow);
 
-        if (subject.getAverageGrade() != null) {
-            ProgressBar progressBarItem = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(6));
-            barParams.setMargins(0, dpToPx(12), 0, 0);
-            progressBarItem.setLayoutParams(barParams);
-            progressBarItem.setProgress(subject.getAverageGrade().intValue());
-            progressBarItem.setProgressTintList(android.content.res.ColorStateList.valueOf(
-                    getGradeColor(subject.getAverageGrade().intValue())));
-            card.addView(progressBarItem);
-        }
+        // Progress bar
+        ProgressBar progressBarItem = new ProgressBar(this, null, android.R.attr. progressBarStyleHorizontal);
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
+                LinearLayout. LayoutParams.MATCH_PARENT, dpToPx(6));
+        barParams.setMargins(0, dpToPx(12), 0, 0);
+        progressBarItem.setLayoutParams(barParams);
+        progressBarItem. setProgress((int) attendanceGrade);
+        progressBarItem.setProgressTintList(android.content.res.ColorStateList.valueOf(getGradeColor((int) attendanceGrade)));
+        card.addView(progressBarItem);
 
+        // Click listener - pass only available data
         card.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SubjectGradesActivity.class);
+            Intent intent = new Intent(this, SubjectAttendanceActivity.class);
             intent.putExtra("courseId", subject.getId());
             intent.putExtra("courseName", subject.getName());
-            intent.putExtra("courseCode", subject.getCode());
-            intent.putExtra("instructor", subject.getInstructors());
+            intent.putExtra("courseCode", subject. getCode());
+            // instructor not available in this model
             startActivity(intent);
         });
 
@@ -466,7 +524,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
         subjectsContainer.removeAllViews();
 
         TextView emptyText = new TextView(this);
-        emptyText.setText("No grades available");
+        emptyText.setText("No attendance records available");
         emptyText.setTextColor(0xFF94A3B8);
         emptyText.setTextSize(16);
         emptyText.setGravity(Gravity.CENTER);
@@ -476,6 +534,10 @@ public class GradesOverviewActivity extends AppCompatActivity {
 
         subjectsContainer.addView(emptyText);
     }
+
+    // ============================================================
+    // QR ATTENDANCE
+    // ============================================================
 
     private void markAttendance(String qrContent) {
         int studentId = authManager.getCurrentUserId();
@@ -557,11 +619,13 @@ public class GradesOverviewActivity extends AppCompatActivity {
                     String title = alreadyMarked ? "Already Marked" : "Attendance Marked";
                     String icon = "present".equals(status) ? "✓" : "⏰";
 
-                    new androidx.appcompat.app.AlertDialog.Builder(GradesOverviewActivity.this)
+                    new androidx.appcompat.app.AlertDialog.Builder(AttendanceOverviewActivity.this)
                             .setTitle(title)
                             .setMessage(icon + " " + message)
                             .setPositiveButton("OK", null)
                             .show();
+
+                    loadAttendanceData();
                 });
             }
 
@@ -593,8 +657,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
 
     private int getGradeColor(int grade) {
         if (grade >= 90) return 0xFF10B981;
-        if (grade >= 80) return 0xFF3B82F6;
-        if (grade >= 70) return 0xFFFBBF24;
+        if (grade >= 75) return 0xFFFFA500;
         return 0xFFEF4444;
     }
 
@@ -625,7 +688,7 @@ public class GradesOverviewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (authManager.isLoggedIn()) {
-            loadGradesData();
+            loadAttendanceData();
         }
     }
 }

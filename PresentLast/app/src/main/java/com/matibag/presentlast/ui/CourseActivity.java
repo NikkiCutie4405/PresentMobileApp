@@ -15,13 +15,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.view.ViewCompat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.matibag.presentlast.AttendanceOverview;
 import com.matibag.presentlast.R;
 import com.matibag.presentlast.api.ApiClient;
 import com.matibag.presentlast.api.AuthManager;
@@ -143,11 +143,6 @@ public class CourseActivity extends AppCompatActivity {
         if (txtWelcomeMessage != null) {
             txtWelcomeMessage.setText("Track your subjects" + (fullName != null ? ", " + fullName : ""));
         }
-
-        // Profile image click -> Settings
-        if (imgLogo != null) {
-            imgLogo.setOnClickListener(v -> startActivity(new Intent(this, setting.class)));
-        }
     }
 
     // ============================================================
@@ -155,21 +150,12 @@ public class CourseActivity extends AppCompatActivity {
     // ============================================================
 
     private void setupNavigation() {
-        // Highlight Courses tab as active
-        if (btnCourse instanceof TextView) {
-            ((TextView) btnCourse).setTextColor(0xFF2563EB);
-        }
-        if (btnHome instanceof TextView) {
-            ((TextView) btnHome).setTextColor(0xFF94A3B8);
-        }
-        if (btnGrades instanceof TextView) {
-            ((TextView) btnGrades).setTextColor(0xFF94A3B8);
-        }
-        if (btnAttendance instanceof TextView) {
-            ((TextView) btnAttendance).setTextColor(0xFF94A3B8);
+        // Highlight Course tab as active
+        if (btnCourse != null) {
+            ViewCompat.setBackgroundTintList(btnCourse,
+                    android.content.res.ColorStateList.valueOf(0xFF2563EB));
         }
 
-        // Navigation click listeners
         if (btnHome != null) {
             btnHome.setOnClickListener(v -> {
                 startActivity(new Intent(this, HomeActivity.class));
@@ -190,7 +176,7 @@ public class CourseActivity extends AppCompatActivity {
 
         if (btnAttendance != null) {
             btnAttendance.setOnClickListener(v -> {
-                startActivity(new Intent(this, AttendanceOverview.class));
+                startActivity(new Intent(this, AttendanceOverviewActivity.class));
                 finish();
             });
         }
@@ -199,7 +185,7 @@ public class CourseActivity extends AppCompatActivity {
             btnScanQR.setOnClickListener(v -> {
                 ScanOptions options = new ScanOptions();
                 options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
-                options.setPrompt("Scan activity_subject_attendance QR code");
+                options.setPrompt("Scan attendance QR code");
                 options.setBeepEnabled(true);
                 options.setOrientationLocked(false);
                 barcodeLauncher.launch(options);

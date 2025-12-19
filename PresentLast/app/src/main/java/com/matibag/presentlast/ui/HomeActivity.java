@@ -12,13 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.view.ViewCompat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.matibag.presentlast.AttendanceOverview;
 import com.matibag.presentlast.R;
 import com.matibag.presentlast.api.ApiClient;
 import com.matibag.presentlast.api.AuthManager;
@@ -100,21 +100,33 @@ public class HomeActivity extends AppCompatActivity {
         if (txtWelcomeMessage != null) {
             txtWelcomeMessage.setText("Welcome back, " + (fullName != null ? fullName : "Student") + "!");
         }
-        if (imgLogo != null) {
-            imgLogo.setOnClickListener(v -> startActivity(new Intent(this, setting.class)));
-        }
     }
 
     private void setupNavigation() {
+        // Highlight Home tab as active
+        if (btnHome != null) {
+            ViewCompat.setBackgroundTintList(btnHome,
+                    android.content.res.ColorStateList.valueOf(0xFF2563EB));
+        }
+
         if (btnHome != null) btnHome.setOnClickListener(v -> loadInboxData());
-        if (btnCourse != null) btnCourse.setOnClickListener(v -> startActivity(new Intent(this, CourseActivity.class)));
-        if (btnGrades != null) btnGrades.setOnClickListener(v -> startActivity(new Intent(this, GradesOverviewActivity.class)));
-        if (btnAttendance != null) btnAttendance.setOnClickListener(v -> startActivity(new Intent(this, AttendanceOverview.class)));
+        if (btnCourse != null) btnCourse.setOnClickListener(v -> {
+            startActivity(new Intent(this, CourseActivity.class));
+            finish();
+        });
+        if (btnGrades != null) btnGrades.setOnClickListener(v -> {
+            startActivity(new Intent(this, GradesOverviewActivity.class));
+            finish();
+        });
+        if (btnAttendance != null) btnAttendance.setOnClickListener(v -> {
+            startActivity(new Intent(this, AttendanceOverviewActivity.class));
+            finish();
+        });
         if (btnScanQR != null) {
             btnScanQR.setOnClickListener(v -> {
                 ScanOptions options = new ScanOptions();
                 options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
-                options.setPrompt("Scan activity_subject_attendance QR code");
+                options.setPrompt("Scan attendance QR code");
                 options.setBeepEnabled(true);
                 options.setOrientationLocked(false);
                 barcodeLauncher.launch(options);

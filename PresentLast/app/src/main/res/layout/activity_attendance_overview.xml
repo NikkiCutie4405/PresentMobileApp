@@ -21,7 +21,6 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:src="@drawable/placeholder"
-            android:padding="4dp"
             android:contentDescription="Profile"/>
 
         <LinearLayout
@@ -34,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Grade Overview"
+                android:text="Attendance Overview"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold"/>
@@ -43,7 +42,7 @@
                 android:id="@+id/txtSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Track your grades across all subjects"
+                android:text="Track your attendance across all subjects"
                 android:textColor="#E0E7FF"
                 android:textSize="14sp"
                 android:layout_marginTop="2dp"/>
@@ -75,17 +74,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Average Grade"
+                    android:text="Attendance"
                     android:textColor="#94A3B8"
                     android:textSize="12sp"/>
 
                 <TextView
-                    android:id="@+id/txtAverageGrade"
+                    android:id="@+id/txtOverallAttendance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#10B981"
-                    android:textSize="36sp"
+                    android:textSize="32sp"
                     android:textStyle="bold"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
@@ -94,7 +93,7 @@
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#334155"
-                android:layout_marginHorizontal="16dp"/>
+                android:layout_marginHorizontal="12dp"/>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -106,17 +105,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Subjects"
-                    android:textColor="#94A3B8"
+                    android:text="Present"
+                    android:textColor="#10B981"
                     android:textSize="12sp"/>
 
                 <TextView
-                    android:id="@+id/txtSubjectsCount"
+                    android:id="@+id/txtPresentCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textColor="#3B82F6"
-                    android:textSize="36sp"
+                    android:textColor="#10B981"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
@@ -125,7 +124,7 @@
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#334155"
-                android:layout_marginHorizontal="16dp"/>
+                android:layout_marginHorizontal="12dp"/>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -137,20 +136,117 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Graded"
-                    android:textColor="#94A3B8"
+                    android:text="Late"
+                    android:textColor="#FFA500"
                     android:textSize="12sp"/>
 
                 <TextView
-                    android:id="@+id/txtGradedCount"
+                    android:id="@+id/txtLateCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textColor="#8B5CF6"
-                    android:textSize="36sp"
+                    android:textColor="#FFA500"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#334155"
+                android:layout_marginHorizontal="12dp"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Absent"
+                    android:textColor="#EF4444"
+                    android:textSize="12sp"/>
+
+                <TextView
+                    android:id="@+id/txtAbsentCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#EF4444"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#334155"
+            android:layout_marginVertical="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Attendance Grade:"
+                android:textColor="#94A3B8"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/txtOverallGrade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textColor="#10B981"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:background="#0F172A"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✓ Present = 100%"
+                android:textColor="#10B981"
+                android:textSize="11sp"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⚠ Late = 50%"
+                android:textColor="#FFA500"
+                android:textSize="11sp"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✗ Absent = 0%"
+                android:textColor="#EF4444"
+                android:textSize="11sp"
+                android:gravity="center"/>
         </LinearLayout>
     </LinearLayout>
 
