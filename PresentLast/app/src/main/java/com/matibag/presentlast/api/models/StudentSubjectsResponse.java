@@ -50,7 +50,7 @@ public class StudentSubjectsResponse {
         public int getCompletedSubmissions() { return completedSubmissions; }
 
         /**
-         * Calculates the percentage of completed assignments/tasks for this subject.
+         * Calculates the percentage of completed assignments/tasks for this activity_subject.
          * Useful for displaying a ProgressBar in the Course List.
          */
         public int getProgress() {

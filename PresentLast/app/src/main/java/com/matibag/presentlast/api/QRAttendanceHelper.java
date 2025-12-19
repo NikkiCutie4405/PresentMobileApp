@@ -122,7 +122,7 @@ public class QRAttendanceHelper {
 
     private static void handleMarkError(String error, MarkCallback callback) {
         if (error == null) {
-            callback.onError("Failed to mark attendance");
+            callback.onError("Failed to mark activity_subject_attendance");
             return;
         }
         String lowErr = error.toLowerCase();

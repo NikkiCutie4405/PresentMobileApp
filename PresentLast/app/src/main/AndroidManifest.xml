@@ -5,8 +5,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -22,9 +26,9 @@
 
         <activity
             android:name=".SplashScreenActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,29 +37,54 @@
 
         <activity
             android:name=".ui.LoginActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize" />
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.HomeActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize" />
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".setting" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".ui.CourseActivity" android:exported="false" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".attendance" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".inbox" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".compose" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".conversation" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".ui.CourseActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".SubjectPage" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".GradesPage" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".SubmissionPage" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".ProfilePage" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".GradesOverView" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
-        <activity android:name=".AttendanceOverview" android:screenOrientation="portrait" android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".ui.SubjectAttendanceActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.SubjectPageActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.SubjectGradesActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.SubmissionPageActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.GradesOverviewActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".AttendanceOverview"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
 
     </application>
 </manifest>

@@ -19,15 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 import com.matibag.presentlast.AttendanceOverview;
-import com.matibag.presentlast.GradesOverView;
 import com.matibag.presentlast.R;
-import com.matibag.presentlast.SubmissionPage;
 import com.matibag.presentlast.api.ApiClient;
 import com.matibag.presentlast.api.AuthManager;
 import com.matibag.presentlast.api.QRAttendanceHelper;
 import com.matibag.presentlast.api.models.QRValidateResponse;
 import com.matibag.presentlast.api.models.StudentInboxResponse;
-import com.matibag.presentlast.setting;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -111,13 +108,13 @@ public class HomeActivity extends AppCompatActivity {
     private void setupNavigation() {
         if (btnHome != null) btnHome.setOnClickListener(v -> loadInboxData());
         if (btnCourse != null) btnCourse.setOnClickListener(v -> startActivity(new Intent(this, CourseActivity.class)));
-        if (btnGrades != null) btnGrades.setOnClickListener(v -> startActivity(new Intent(this, GradesOverView.class)));
+        if (btnGrades != null) btnGrades.setOnClickListener(v -> startActivity(new Intent(this, GradesOverviewActivity.class)));
         if (btnAttendance != null) btnAttendance.setOnClickListener(v -> startActivity(new Intent(this, AttendanceOverview.class)));
         if (btnScanQR != null) {
             btnScanQR.setOnClickListener(v -> {
                 ScanOptions options = new ScanOptions();
                 options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
-                options.setPrompt("Scan attendance QR code");
+                options.setPrompt("Scan activity_subject_attendance QR code");
                 options.setBeepEnabled(true);
                 options.setOrientationLocked(false);
                 barcodeLauncher.launch(options);
@@ -223,7 +220,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onNotEnrolled() {
                 runOnUiThread(() -> {
                     progressDialog.dismiss();
-                    showError("You are not enrolled in this subject");
+                    showError("You are not enrolled in this activity_subject");
                 });
             }
 
@@ -371,7 +368,9 @@ public class HomeActivity extends AppCompatActivity {
         lbl.setTextColor(task.isGraded() ? 0xFF10B981 : (task.isSubmitted() ? 0xFF3B82F6 : (task.isOverdue() ? 0xFFEF4444 : 0xFF6366F1)));
         lbl.setTextSize(12);
         lbl.setTypeface(null, Typeface.BOLD);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, -2); lp.weight = 1; lbl.setLayoutParams(lp);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, -2);
+        lp.weight = 1;
+        lbl.setLayoutParams(lp);
         row.addView(lbl);
 
         TextView time = new TextView(this);
@@ -392,11 +391,22 @@ public class HomeActivity extends AppCompatActivity {
         title.setTypeface(null, Typeface.BOLD);
         card.addView(title);
 
+        // Pass only available data - SubmissionPageActivity will load the rest from API
         card.setOnClickListener(v -> {
-            Intent i = new Intent(this, SubmissionPage.class);
+            Intent i = new Intent(this, SubmissionPageActivity.class);
             i.putExtra("taskId", task.getId());
+            i.putExtra("taskTitle", task.getTaskName());
+            i.putExtra("dueDate", task.getDueDate());
+            // dueTime and maxAttempts not available in TaskItem - will be loaded from API
+            if (task.getSubjectName() != null) {
+                i.putExtra("subjectName", task.getSubjectName());
+            }
+            if (task.getSubjectCode() != null) {
+                i.putExtra("subjectCode", task.getSubjectCode());
+            }
             startActivity(i);
         });
+
         updatesContainer.addView(card);
     }
 

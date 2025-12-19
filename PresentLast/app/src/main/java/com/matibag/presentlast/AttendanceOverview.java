@@ -13,7 +13,9 @@ import android.widget.TextView;
 
 import com.journeyapps.barcodescanner.ScanOptions;
 import com.matibag.presentlast.ui.CourseActivity;
+import com.matibag.presentlast.ui.GradesOverviewActivity;
 import com.matibag.presentlast.ui.HomeActivity;
+import com.matibag.presentlast.ui.SubjectAttendanceActivity;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
@@ -28,7 +30,7 @@ public class AttendanceOverview extends Activity {
     //            new ScanContract(),
     //            result -> {
     //                if(result.getContents() != null) {
-    //                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+    //                    Toast.makeText(activity_subject_attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
     //                    markAttendance(result.getContents());
     //                }
     //            }
@@ -80,7 +82,7 @@ public class AttendanceOverview extends Activity {
         });
 
         GRADES.setOnClickListener(view -> {
-            Intent intent = new Intent(AttendanceOverview.this, GradesOverView.class);
+            Intent intent = new Intent(AttendanceOverview.this, GradesOverviewActivity.class);
             startActivity(intent);
             finish();
         });
@@ -91,25 +93,25 @@ public class AttendanceOverview extends Activity {
             finish();
         });
 
-        // Calculate and display overall attendance
+        // Calculate and display overall activity_subject_attendance
         calculateOverallAttendance();
 
-        // Load subjects with attendance
+        // Load subjects with activity_subject_attendance
         loadSubjectsAttendance();
     }
 
     private void calculateOverallAttendance() {
         // TODO: Query from database
-        // Sample calculation with Late attendance
+        // Sample calculation with Late activity_subject_attendance
         int totalPresent = 85;
         int totalLate = 7;
         int totalAbsent = 8;
         int totalDays = totalPresent + totalLate + totalAbsent;
 
-        // Calculate attendance percentage (Present + Late)
+        // Calculate activity_subject_attendance percentage (Present + Late)
         double attendancePercentage = ((totalPresent + totalLate) * 100.0) / totalDays;
 
-        // Calculate attendance grade (Present = 100%, Late = 50%, Absent = 0%)
+        // Calculate activity_subject_attendance grade (Present = 100%, Late = 50%, Absent = 0%)
         double attendanceGrade = ((totalPresent * 100.0) + (totalLate * 50.0)) / totalDays;
 
         txtOverallAttendance.setText(String.format("%.0f%%", attendancePercentage));
@@ -118,13 +120,13 @@ public class AttendanceOverview extends Activity {
         txtAbsentDays.setText("Absent: " + totalAbsent + " days (0%)");
         txtTotalDays.setText("Total: " + totalDays + " days");
 
-        // Display attendance grade
+        // Display activity_subject_attendance grade
         if (txtOverallGrade != null) {
             txtOverallGrade.setText(String.format("Overall Grade: %.1f%%", attendanceGrade));
             txtOverallGrade.setTextColor(getGradeColor(attendanceGrade));
         }
 
-        // Set color based on attendance grade
+        // Set color based on activity_subject_attendance grade
         if (attendanceGrade >= 90) {
             txtOverallAttendance.setTextColor(0xFF10B981); // Green
         } else if (attendanceGrade >= 75) {
@@ -135,7 +137,7 @@ public class AttendanceOverview extends Activity {
     }
 
     private void loadSubjectsAttendance() {
-        // Sample data with Late attendance - TODO: Load from database
+        // Sample data with Late activity_subject_attendance - TODO: Load from database
         String[][] subjectsData = {
                 {"1", "CS101", "Introduction to Programming", "Dr. Smith", "17", "1", "2", "20"},
                 {"2", "MATH201", "Calculus II", "Prof. Johnson", "15", "2", "3", "20"},
@@ -154,10 +156,10 @@ public class AttendanceOverview extends Activity {
             int absent = Integer.parseInt(subject[6]);
             int total = Integer.parseInt(subject[7]);
 
-            // Calculate attendance percentage (Present + Late)
+            // Calculate activity_subject_attendance percentage (Present + Late)
             int percentage = ((present + late) * 100) / total;
 
-            // Calculate attendance grade (Present = 100%, Late = 50%, Absent = 0%)
+            // Calculate activity_subject_attendance grade (Present = 100%, Late = 50%, Absent = 0%)
             double attendanceGrade = ((present * 100.0) + (late * 50.0)) / total;
 
             addSubjectAttendanceCard(courseId, courseCode, courseName, instructor,
@@ -236,7 +238,7 @@ public class AttendanceOverview extends Activity {
         txtPercentage.setTextSize(40);
         txtPercentage.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Set color based on attendance grade
+        // Set color based on activity_subject_attendance grade
         txtPercentage.setTextColor(getGradeColor(attendanceGrade));
 
         rightSection.addView(txtPercentage);
@@ -304,9 +306,9 @@ public class AttendanceOverview extends Activity {
         progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(getGradeColor(attendanceGrade)));
         card.addView(progressBar);
 
-        // Click listener to open detailed attendance page for this subject
+        // Click listener to open detailed activity_subject_attendance page for this activity_subject
         card.setOnClickListener(view -> {
-            Intent intent = new Intent(AttendanceOverview.this, attendance.class);
+            Intent intent = new Intent(AttendanceOverview.this, SubjectAttendanceActivity.class);
             intent.putExtra("courseId", courseId);
             intent.putExtra("courseName", courseName);
             intent.putExtra("courseCode", courseCode);

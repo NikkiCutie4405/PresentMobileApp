@@ -220,7 +220,7 @@
             android:paddingHorizontal="16dp"
             android:paddingBottom="16dp">
 
-            <!-- Subject attendance cards will be added dynamically here -->
+            <!-- Subject activity_subject_attendance cards will be added dynamically here -->
 
         </LinearLayout>
     </ScrollView>

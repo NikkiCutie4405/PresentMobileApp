@@ -1,156 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#1F1F1F">
+    android:background="#0F172A">
 
-    <!-- Header with Logo and Title -->
-    <LinearLayout
+    <!-- Reusable Header -->
+    <include
+        android:id="@+id/layoutHeader"
+        layout="@layout/layout_part_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#2563EB"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/imgLogo"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="@drawable/placeholder"
-            android:contentDescription="Logo" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Course "
-                android:textColor="#FFFFFF"
-                android:textSize="28sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Track your subjects"
-                android:textColor="#E0E7FF"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Filter Section -->
+    <!-- Custom Body for Courses (Filter + List) -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#1F1F1F">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔽"
-            android:textSize="24sp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="12dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerSemester"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:background="#FFFFFF"
-            android:padding="12dp"
-            android:layout_marginEnd="12dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerYear"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:background="#FFFFFF"
-            android:padding="12dp"/>
-    </LinearLayout>
-
-    <!-- Scrollable Course Cards -->
-    <ScrollView
+        android:id="@+id/layoutBody"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#1F1F1F">
+        android:orientation="vertical"
+        android:background="#0F172A"
+        app:layout_constraintTop_toBottomOf="@id/layoutHeader"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Filter Section -->
         <LinearLayout
-            android:id="@+id/coursesContainer"
+            android:id="@+id/filterSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:background="#1E293B"
+            android:gravity="center_vertical">
 
-            <!-- Course cards will be added here dynamically -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔽"
+                android:textSize="20sp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="12dp"/>
 
+            <Spinner
+                android:id="@+id/spinnerSemester"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_spinner"
+                android:paddingHorizontal="12dp"
+                android:layout_marginEnd="12dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerYear"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_spinner"
+                android:paddingHorizontal="12dp"/>
         </LinearLayout>
-    </ScrollView>
 
-    <!-- Fixed bottom navigation -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#2D2D2D"
-        android:paddingVertical="8dp">
-
-        <Button
-            android:id="@+id/home"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+        <!-- Scrollable Course Cards -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="🏠"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2D2D2D"/>
+            android:background="#0F172A"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp">
 
-        <Button
-            android:id="@+id/course"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📚"
-            android:textColor="#9CA3AF"
-            android:backgroundTint="#2563EB"/>
+            <LinearLayout
+                android:id="@+id/coursesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <Button
-            android:id="@+id/scanButton"
-            android:layout_width="0dp"
-            android:layout_height="70dp"
-            android:layout_weight="2"
-            android:text="📷"
-            android:textSize="30dp"
-            android:textColor="#9CA3AF"
-            android:backgroundTint="#F59E0B"/>
-        <Button
-            android:id="@+id/Grades"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📊"
-            android:textColor="#9CA3AF"
-            android:backgroundTint="#2D2D2D"/>
+                <!-- Course cards will be added here dynamically -->
 
-        <Button
-            android:id="@+id/attendance"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="📅"
-            android:textColor="#9CA3AF"
-            android:backgroundTint="#2D2D2D"/>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 
-</LinearLayout>
+    <!-- Reusable Navigation -->
+    <include
+        android:id="@+id/layoutNav"
+        layout="@layout/layout_part_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

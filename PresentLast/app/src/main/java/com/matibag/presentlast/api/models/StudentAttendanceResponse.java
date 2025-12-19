@@ -35,7 +35,7 @@ public class StudentAttendanceResponse {
         public int getExcusedCount() { return excusedCount; }
 
         /**
-         * Calculates attendance rate where Present and Late both count toward participation.
+         * Calculates activity_subject_attendance rate where Present and Late both count toward participation.
          */
         public int getAttendanceRate() {
             if (totalSessions == 0) return 0;

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#1E293B"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="12dp">
+
+    <TextView
+        android:id="@+id/tabContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="📄 Content"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingVertical="8dp"/>
+
+    <TextView
+        android:id="@+id/tabAttendance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="🕐 Attendance"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingVertical="8dp"/>
+
+    <TextView
+        android:id="@+id/tabGrades"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="📊 Grades"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingVertical="8dp"/>
+
+</LinearLayout>

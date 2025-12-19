@@ -1,40 +1,64 @@
 package com.matibag.presentlast.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import com.journeyapps.barcodescanner.ScanOptions;
-import com.matibag.presentlast.AttendanceOverview;
-import com.matibag.presentlast.GradesOverView;
-import com.matibag.presentlast.R;
-import com.matibag.presentlast.SubjectPage;
-import com.matibag.presentlast.setting;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+import com.matibag.presentlast.AttendanceOverview;
+import com.matibag.presentlast.R;
+import com.matibag.presentlast.api.ApiClient;
+import com.matibag.presentlast.api.AuthManager;
+import com.matibag.presentlast.api.QRAttendanceHelper;
+import com.matibag.presentlast.api.models.QRValidateResponse;
+import com.matibag.presentlast.api.models.StudentSubjectsResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CourseActivity extends Activity {
-    ImageView PROFILE;
-    Button HOME, COURSE, GRADES, ATTENDANCE,btnScanQR;
-    LinearLayout coursesContainer;
-    Spinner spinnerSemester, spinnerYear;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-    // Array of vibrant colors for CourseActivity cards
+public class CourseActivity extends AppCompatActivity {
+
+    private static final String TAG = "CourseActivity";
+
+    // Header views (from included layout)
+    private TextView txtHeaderTitle, txtWelcomeMessage;
+    private ImageView imgLogo;
+
+    // Navigation views (from included layout)
+    private View btnHome, btnCourse, btnGrades, btnAttendance, btnScanQR;
+
+    // Course-specific views
+    private LinearLayout coursesContainer;
+    private Spinner spinnerSemester, spinnerYear;
+    private ProgressBar progressBar;
+
+    // Data
+    private AuthManager authManager;
+    private StudentSubjectsResponse subjectsResponse;
+    private String currentSemester = "";
+    private String currentYear = "";
+
+    // Card colors
     private final int[] cardColors = {
             0xFF2563EB, // Blue
             0xFF9333EA, // Purple
@@ -46,89 +70,168 @@ public class CourseActivity extends Activity {
             0xFF8B5CF6  // Violet
     };
 
-    // Store all activity_courses data
-    private List<CourseData> allCourses = new ArrayList<>();
-    private ActivityResultLauncher<ScanOptions> barcodeLauncher;
-    //    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
-    //            new ScanContract(),
-    //            result -> {
-    //                if(result.getContents() != null) {
-    //                    Toast.makeText(attendance.this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-    //                    markAttendance(result.getContents());
-    //                }
-    //            }
-    //    );
+    // QR Scanner
+    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
+            new ScanContract(),
+            result -> {
+                if (result.getContents() != null) {
+                    markAttendance(result.getContents());
+                }
+            }
+    );
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_courses);
-        btnScanQR = findViewById(R.id.scanButton);
-        HOME = findViewById(R.id.home);
-        COURSE = findViewById(R.id.course); // Initialize COURSE button
-        GRADES = findViewById(R.id.Grades);
-        ATTENDANCE = findViewById(R.id.attendance);
+
+        authManager = AuthManager.getInstance(this);
+
+        if (!authManager.isLoggedIn()) {
+            navigateToLogin();
+            return;
+        }
+
+        initViews();
+        setupHeader();
+        setupNavigation();
+        setupSpinners();
+        loadSubjectsData();
+    }
+
+    // ============================================================
+    // VIEW INITIALIZATION
+    // ============================================================
+
+    private void initViews() {
+        // Header views (from included layout_part_header)
+        View headerLayout = findViewById(R.id.layoutHeader);
+        if (headerLayout != null) {
+            txtHeaderTitle = headerLayout.findViewById(R.id.txtHeaderTitle);
+            txtWelcomeMessage = headerLayout.findViewById(R.id.txtWelcomeMessage);
+            imgLogo = headerLayout.findViewById(R.id.imgLogo);
+        }
+
+        // Navigation views (from included layout_part_nav)
+        View navLayout = findViewById(R.id.layoutNav);
+        if (navLayout != null) {
+            btnHome = navLayout.findViewById(R.id.home);
+            btnCourse = navLayout.findViewById(R.id.course);
+            btnGrades = navLayout.findViewById(R.id.Grades);
+            btnAttendance = navLayout.findViewById(R.id.attendance);
+            btnScanQR = navLayout.findViewById(R.id.scanButton);
+        }
+
+        // Course-specific views
         coursesContainer = findViewById(R.id.coursesContainer);
         spinnerSemester = findViewById(R.id.spinnerSemester);
         spinnerYear = findViewById(R.id.spinnerYear);
-        PROFILE = findViewById(R.id.imgLogo);
-        PROFILE.setOnClickListener(view -> {
-            Intent callMainT = new Intent(CourseActivity.this, setting.class);
-            startActivity(callMainT);
-        });
-        // Setup spinners with listeners
-        setupSpinners();
-        btnScanQR.setOnClickListener(view -> {
-            ScanOptions options = new ScanOptions();
-            options.setPrompt("Scan QR Code to Mark Attendance");
-            options.setBeepEnabled(true);
-            options.setBarcodeImageEnabled(true);
-            barcodeLauncher.launch(options);
-        });
-        HOME.setOnClickListener(view -> {
-            Intent callMainT = new Intent(CourseActivity.this, HomeActivity.class);
-            startActivity(callMainT);
-            finish();
-        });
 
-        GRADES.setOnClickListener(view -> {
-            Intent callMainT = new Intent(CourseActivity.this, GradesOverView.class);
-            startActivity(callMainT);
-            finish();
-        });
-
-        ATTENDANCE.setOnClickListener(view -> {
-            Intent callMainT = new Intent(CourseActivity.this, AttendanceOverview.class);
-            startActivity(callMainT);
-            finish();
-        });
-
-        // Load sample activity_courses data
-        loadSampleCourses();
-
-        // Display all activity_courses initially
-        displayCourses("All Semesters", "All Years");
+        // Create a progress bar programmatically if not in XML
+        progressBar = new ProgressBar(this);
+        progressBar.setVisibility(View.GONE);
     }
 
+    private void setupHeader() {
+        // Set header title for Courses page
+        if (txtHeaderTitle != null) {
+            txtHeaderTitle.setText("Courses");
+        }
+
+        // Set welcome message with user's name
+        String fullName = authManager.getCurrentFullName();
+        if (txtWelcomeMessage != null) {
+            txtWelcomeMessage.setText("Track your subjects" + (fullName != null ? ", " + fullName : ""));
+        }
+
+        // Profile image click -> Settings
+        if (imgLogo != null) {
+            imgLogo.setOnClickListener(v -> startActivity(new Intent(this, setting.class)));
+        }
+    }
+
+    // ============================================================
+    // NAVIGATION SETUP
+    // ============================================================
+
+    private void setupNavigation() {
+        // Highlight Courses tab as active
+        if (btnCourse instanceof TextView) {
+            ((TextView) btnCourse).setTextColor(0xFF2563EB);
+        }
+        if (btnHome instanceof TextView) {
+            ((TextView) btnHome).setTextColor(0xFF94A3B8);
+        }
+        if (btnGrades instanceof TextView) {
+            ((TextView) btnGrades).setTextColor(0xFF94A3B8);
+        }
+        if (btnAttendance instanceof TextView) {
+            ((TextView) btnAttendance).setTextColor(0xFF94A3B8);
+        }
+
+        // Navigation click listeners
+        if (btnHome != null) {
+            btnHome.setOnClickListener(v -> {
+                startActivity(new Intent(this, HomeActivity.class));
+                finish();
+            });
+        }
+
+        if (btnCourse != null) {
+            btnCourse.setOnClickListener(v -> loadSubjectsData()); // Refresh
+        }
+
+        if (btnGrades != null) {
+            btnGrades.setOnClickListener(v -> {
+                startActivity(new Intent(this, GradesOverviewActivity.class));
+                finish();
+            });
+        }
+
+        if (btnAttendance != null) {
+            btnAttendance.setOnClickListener(v -> {
+                startActivity(new Intent(this, AttendanceOverview.class));
+                finish();
+            });
+        }
+
+        if (btnScanQR != null) {
+            btnScanQR.setOnClickListener(v -> {
+                ScanOptions options = new ScanOptions();
+                options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+                options.setPrompt("Scan activity_subject_attendance QR code");
+                options.setBeepEnabled(true);
+                options.setOrientationLocked(false);
+                barcodeLauncher.launch(options);
+            });
+        }
+    }
+
+    // ============================================================
+    // SPINNER SETUP
+    // ============================================================
+
     private void setupSpinners() {
-        // Setup semester spinner
-        String[] semesters = {"All Semesters", "1st Semester", "2nd Semester", "Summer"};
+        // Initial placeholder data - will be replaced by API response
+        String[] defaultSemesters = {"All Semesters"};
+        String[] defaultYears = {"All Years"};
+
         ArrayAdapter<String> semesterAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, semesters);
+                android.R.layout.simple_spinner_item, defaultSemesters);
         semesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSemester.setAdapter(semesterAdapter);
 
-        // Setup year spinner
-        String[] years = {"All Years", "2023", "2024", "2025"};
         ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, years);
+                android.R.layout.simple_spinner_item, defaultYears);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerYear.setAdapter(yearAdapter);
 
-        // Add listeners for filtering
+        // Listeners for filtering
         spinnerSemester.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                filterCourses();
+                currentSemester = parent.getItemAtPosition(position).toString();
+                displayCourses();
             }
 
             @Override
@@ -138,7 +241,8 @@ public class CourseActivity extends Activity {
         spinnerYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                filterCourses();
+                currentYear = parent.getItemAtPosition(position).toString();
+                displayCourses();
             }
 
             @Override
@@ -146,68 +250,129 @@ public class CourseActivity extends Activity {
         });
     }
 
-    /**
-     * Load sample activity_courses with semester and year data
-     * TODO: Replace with actual database query
-     */
-    private void loadSampleCourses() {
-        allCourses.clear();
+    private void updateSpinnersFromResponse() {
+        if (subjectsResponse == null) return;
 
-        // Sample data with semester and year
-        allCourses.add(new CourseData(1, "CS 201", "Data Structures", "Dr. Maria Santos", 85, "1st Semester", "2024"));
-        allCourses.add(new CourseData(2, "CS 202", "Database Systems", "Prof. Juan Dela Cruz", 72, "1st Semester", "2024"));
-        allCourses.add(new CourseData(3, "CS 203", "Web Development", "Engr. Ana Reyes", 90, "2nd Semester", "2024"));
-        allCourses.add(new CourseData(4, "MA 301", "Discrete Mathematics", "Dr. Ramon Lopez", 78, "1st Semester", "2024"));
-        allCourses.add(new CourseData(5, "CS 301", "Software Engineering", "Engr. Maria Garcia", 88, "2nd Semester", "2024"));
-        allCourses.add(new CourseData(6, "CS 101", "Introduction to Programming", "Dr. Smith", 95, "1st Semester", "2023"));
+        // Update semester spinner
+        List<String> semesters = subjectsResponse.getSemesters();
+        if (semesters != null && !semesters.isEmpty()) {
+            List<String> semesterList = new ArrayList<>();
+            semesterList.add("All Semesters");
+            semesterList.addAll(semesters);
+
+            ArrayAdapter<String> semesterAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, semesterList);
+            semesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerSemester.setAdapter(semesterAdapter);
+        }
+
+        // Update year spinner
+        List<String> years = subjectsResponse.getYears();
+        if (years != null && !years.isEmpty()) {
+            List<String> yearList = new ArrayList<>();
+            yearList.add("All Years");
+            yearList.addAll(years);
+
+            ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, yearList);
+            yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerYear.setAdapter(yearAdapter);
+        }
     }
 
-    /**
-     * Filter activity_courses based on selected semester and year
-     */
-    private void filterCourses() {
-        String selectedSemester = spinnerSemester.getSelectedItem().toString();
-        String selectedYear = spinnerYear.getSelectedItem().toString();
+    // ============================================================
+    // API DATA LOADING
+    // ============================================================
 
-        displayCourses(selectedSemester, selectedYear);
+    private void loadSubjectsData() {
+        int studentId = authManager.getCurrentUserId();
+        if (studentId == -1) {
+            navigateToLogin();
+            return;
+        }
+
+        setLoading(true);
+
+        // Pass empty strings to get all subjects initially
+        String semesterFilter = currentSemester.equals("All Semesters") ? "" : currentSemester;
+        String yearFilter = currentYear.equals("All Years") ? "" : currentYear;
+
+        ApiClient.getApiService().getStudentSubjects(studentId, semesterFilter, yearFilter)
+                .enqueue(new Callback<StudentSubjectsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<StudentSubjectsResponse> call,
+                                           @NonNull Response<StudentSubjectsResponse> response) {
+                        runOnUiThread(() -> {
+                            setLoading(false);
+                            if (response.isSuccessful() && response.body() != null) {
+                                StudentSubjectsResponse res = response.body();
+                                if (res.isSuccess()) {
+                                    subjectsResponse = res;
+                                    updateSpinnersFromResponse();
+                                    displayCourses();
+                                } else {
+                                    showError(res.getError());
+                                    displayNoCoursesMessage();
+                                }
+                            } else {
+                                showError("Failed to load courses");
+                                displayNoCoursesMessage();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<StudentSubjectsResponse> call, @NonNull Throwable t) {
+                        runOnUiThread(() -> {
+                            setLoading(false);
+                            showError("Connection error: " + t.getMessage());
+                            displayNoCoursesMessage();
+                        });
+                    }
+                });
     }
 
-    /**
-     * Display activity_courses filtered by semester and year
-     */
-    private void displayCourses(String semester, String year) {
+    // ============================================================
+    // DISPLAY COURSES
+    // ============================================================
+
+    private void displayCourses() {
+        if (coursesContainer == null) return;
         coursesContainer.removeAllViews();
 
+        if (subjectsResponse == null || subjectsResponse.getSubjects() == null) {
+            displayNoCoursesMessage();
+            return;
+        }
+
+        List<StudentSubjectsResponse.Subject> subjects = subjectsResponse.getSubjects();
         int colorIndex = 0;
         int displayedCount = 0;
 
-        for (CourseData courseData : allCourses) {
-            // Check if CourseActivity matches filter criteria
-            boolean semesterMatch = semester.equals("All Semesters") || courseData.semester.equals(semester);
-            boolean yearMatch = year.equals("All Years") || courseData.year.equals(year);
+        for (StudentSubjectsResponse.Subject subject : subjects) {
+            // Filter by semester and year
+            boolean semesterMatch = currentSemester.equals("All Semesters") ||
+                    currentSemester.isEmpty() ||
+                    (subject.getSemesterName() != null && subject.getSemesterName().equals(currentSemester));
+
+            boolean yearMatch = currentYear.equals("All Years") ||
+                    currentYear.isEmpty() ||
+                    (subject.getSchoolYear() != null && subject.getSchoolYear().equals(currentYear));
 
             if (semesterMatch && yearMatch) {
                 int cardColor = cardColors[colorIndex % cardColors.length];
-                addCourseCard(courseData, cardColor);
+                addCourseCard(subject, cardColor);
                 colorIndex++;
                 displayedCount++;
             }
         }
 
-        // Show message if no activity_courses found
         if (displayedCount == 0) {
-            TextView emptyText = new TextView(this);
-            emptyText.setText("No activity_courses found for selected filters");
-            emptyText.setTextColor(0xFF9CA3AF);
-            emptyText.setTextSize(16);
-            emptyText.setGravity(Gravity.CENTER);
-            emptyText.setPadding(16, 64, 16, 16);
-            coursesContainer.addView(emptyText);
+            displayNoCoursesMessage();
         }
     }
 
-    private void addCourseCard(CourseData courseData, int backgroundColor) {
-        // Create main card container
+    private void addCourseCard(StudentSubjectsResponse.Subject subject, int backgroundColor) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setBackgroundColor(backgroundColor);
@@ -231,33 +396,28 @@ public class CourseActivity extends Activity {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
-        // Left side (CourseActivity info)
+        // Course info
         LinearLayout courseInfo = new LinearLayout(this);
         courseInfo.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
         infoParams.weight = 1;
         courseInfo.setLayoutParams(infoParams);
 
         // Course name
         TextView txtCourseName = new TextView(this);
-        txtCourseName.setText(courseData.courseName);
+        txtCourseName.setText(subject.getName());
         txtCourseName.setTextColor(Color.WHITE);
         txtCourseName.setTextSize(22);
-        txtCourseName.setTypeface(null, android.graphics.Typeface.BOLD);
+        txtCourseName.setTypeface(null, Typeface.BOLD);
         courseInfo.addView(txtCourseName);
 
         // Course code
         TextView txtCourseCode = new TextView(this);
-        txtCourseCode.setText(courseData.courseCode);
+        txtCourseCode.setText(subject.getCode() != null ? subject.getCode() : "");
         txtCourseCode.setTextColor(0xFFE0E7FF);
         txtCourseCode.setTextSize(14);
         LinearLayout.LayoutParams codeParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         codeParams.setMargins(0, dpToPx(4), 0, 0);
         txtCourseCode.setLayoutParams(codeParams);
         courseInfo.addView(txtCourseCode);
@@ -280,22 +440,18 @@ public class CourseActivity extends Activity {
         lblInstructor.setTextColor(0xFFB3D1FF);
         lblInstructor.setTextSize(10);
         LinearLayout.LayoutParams lblParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lblParams.setMargins(0, dpToPx(20), 0, 0);
         lblInstructor.setLayoutParams(lblParams);
         card.addView(lblInstructor);
 
         // Instructor name
         TextView txtInstructor = new TextView(this);
-        txtInstructor.setText(courseData.instructor);
+        txtInstructor.setText(subject.getInstructors() != null ? subject.getInstructors() : "TBA");
         txtInstructor.setTextColor(Color.WHITE);
         txtInstructor.setTextSize(16);
         LinearLayout.LayoutParams instrParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         instrParams.setMargins(0, dpToPx(4), 0, 0);
         txtInstructor.setLayoutParams(instrParams);
         card.addView(txtInstructor);
@@ -306,9 +462,7 @@ public class CourseActivity extends Activity {
         lblProgress.setTextColor(0xFFB3D1FF);
         lblProgress.setTextSize(10);
         LinearLayout.LayoutParams progLblParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         progLblParams.setMargins(0, dpToPx(12), 0, 0);
         lblProgress.setLayoutParams(progLblParams);
         card.addView(lblProgress);
@@ -317,81 +471,228 @@ public class CourseActivity extends Activity {
         LinearLayout progressSection = new LinearLayout(this);
         progressSection.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams progSectionParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         progSectionParams.setMargins(0, dpToPx(8), 0, 0);
         progressSection.setLayoutParams(progSectionParams);
 
         // Progress bar
-        ProgressBar progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
-                0,
-                dpToPx(8)
-        );
+        ProgressBar progressBarItem = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(0, dpToPx(8));
         barParams.weight = 1;
         barParams.gravity = Gravity.CENTER_VERTICAL;
-        progressBar.setLayoutParams(barParams);
-        progressBar.setProgress(courseData.progress);
-        progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
-        progressSection.addView(progressBar);
+        progressBarItem.setLayoutParams(barParams);
+        progressBarItem.setProgress(subject.getProgress());
+        progressBarItem.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+        progressSection.addView(progressBarItem);
 
         // Progress percentage
         TextView txtProgress = new TextView(this);
-        txtProgress.setText(courseData.progress + "%");
+        txtProgress.setText(subject.getProgress() + "%");
         txtProgress.setTextColor(Color.WHITE);
         txtProgress.setTextSize(16);
-        txtProgress.setTypeface(null, android.graphics.Typeface.BOLD);
+        txtProgress.setTypeface(null, Typeface.BOLD);
         LinearLayout.LayoutParams progTextParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         progTextParams.setMargins(dpToPx(12), 0, 0, 0);
         txtProgress.setLayoutParams(progTextParams);
         progressSection.addView(txtProgress);
 
         card.addView(progressSection);
 
-        // Set click listener to open subject page with tabs
+        // Click listener
         card.setOnClickListener(view -> {
-            Intent intent = new Intent(CourseActivity.this, SubjectPage.class);
-            intent.putExtra("courseId", courseData.courseId);
-            intent.putExtra("courseName", courseData.courseName);
-            intent.putExtra("courseCode", courseData.courseCode);
-            intent.putExtra("instructor", courseData.instructor);
+            Intent intent = new Intent(CourseActivity.this, SubjectPageActivity.class);
+            intent.putExtra("courseId", subject.getId());
+            intent.putExtra("courseName", subject.getName());
+            intent.putExtra("courseCode", subject.getCode());
+            intent.putExtra("instructor", subject.getInstructors());
             startActivity(intent);
         });
 
-        // Add card to container
         coursesContainer.addView(card);
     }
 
-    private int dpToPx(int dp) {
-        float density = getResources().getDisplayMetrics().density;
-        return Math.round(dp * density);
+    private void displayNoCoursesMessage() {
+        if (coursesContainer == null) return;
+        coursesContainer.removeAllViews();
+
+        TextView emptyText = new TextView(this);
+        emptyText.setText("No courses found for selected filters");
+        emptyText.setTextColor(0xFF94A3B8);
+        emptyText.setTextSize(16);
+        emptyText.setGravity(Gravity.CENTER);
+        emptyText.setBackgroundColor(0xFF1E293B);
+        int padding = dpToPx(24);
+        emptyText.setPadding(padding, padding, padding, padding);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, dpToPx(16), 0, 0);
+        emptyText.setLayoutParams(params);
+
+        coursesContainer.addView(emptyText);
     }
 
-    /**
-     * Inner class to store CourseActivity data
-     */
-    private class CourseData {
-        int courseId;
-        String courseCode;
-        String courseName;
-        String instructor;
-        int progress;
-        String semester;
-        String year;
+    // ============================================================
+    // QR ATTENDANCE
+    // ============================================================
 
-        CourseData(int courseId, String courseCode, String courseName, String instructor,
-                   int progress, String semester, String year) {
-            this.courseId = courseId;
-            this.courseCode = courseCode;
-            this.courseName = courseName;
-            this.instructor = instructor;
-            this.progress = progress;
-            this.semester = semester;
-            this.year = year;
+    private void markAttendance(String qrContent) {
+        int studentId = authManager.getCurrentUserId();
+        if (studentId == -1) {
+            showError("Session expired");
+            return;
+        }
+
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Validating QR code...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        QRAttendanceHelper.validateQRToken(qrContent, new QRAttendanceHelper.ValidateCallback() {
+            @Override
+            public void onValid(QRValidateResponse.SessionInfo session, String willBeMarkedAs) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showAttendanceConfirmDialog(qrContent, session, willBeMarkedAs, studentId);
+                });
+            }
+
+            @Override
+            public void onExpired() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("This QR code has expired");
+                });
+            }
+
+            @Override
+            public void onInvalid(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+        });
+    }
+
+    private void showAttendanceConfirmDialog(String qrContent, QRValidateResponse.SessionInfo session,
+                                             String willBeMarkedAs, int studentId) {
+        String subjectInfo = (session.getSubjectCode() != null)
+                ? session.getSubjectCode() + " - " + session.getSubjectName()
+                : session.getSubjectName();
+
+        String statusText = "present".equals(willBeMarkedAs) ? "Present ✓" : "Late ⏰";
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Mark Attendance")
+                .setMessage("Subject: " + subjectInfo + "\n" +
+                        "Date: " + session.getDate() + "\n" +
+                        "Time: " + session.getTime() + "\n\n" +
+                        "You will be marked as:  " + statusText)
+                .setPositiveButton("Confirm", (dialog, which) -> confirmAttendance(qrContent, studentId))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmAttendance(String qrContent, int studentId) {
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Processing...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        QRAttendanceHelper.markAttendance(qrContent, studentId, new QRAttendanceHelper.MarkCallback() {
+            @Override
+            public void onSuccess(String status, String message, boolean alreadyMarked) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    String title = alreadyMarked ? "Already Marked" : "Attendance Marked";
+                    String icon = "present".equals(status) ? "✓" : "⏰";
+
+                    new androidx.appcompat.app.AlertDialog.Builder(CourseActivity.this)
+                            .setTitle(title)
+                            .setMessage(icon + " " + message)
+                            .setPositiveButton("OK", null)
+                            .show();
+                });
+            }
+
+            @Override
+            public void onNotEnrolled() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("You are not enrolled in this activity_subject");
+                });
+            }
+
+            @Override
+            public void onExpired() {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError("This QR code has expired");
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    showError(errorMessage);
+                });
+            }
+        });
+    }
+
+    // ============================================================
+    // UTILITY METHODS
+    // ============================================================
+
+    private void setLoading(boolean loading) {
+        if (loading && coursesContainer != null) {
+            coursesContainer.removeAllViews();
+
+            LinearLayout loadingContainer = new LinearLayout(this);
+            loadingContainer.setGravity(Gravity.CENTER);
+            loadingContainer.setPadding(0, dpToPx(48), 0, dpToPx(48));
+
+            ProgressBar pb = new ProgressBar(this);
+            pb.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(0xFF2563EB));
+            loadingContainer.addView(pb);
+
+            coursesContainer.addView(loadingContainer);
+        }
+    }
+
+    private void showError(String message) {
+        if (message != null) {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (authManager.isLoggedIn()) {
+            loadSubjectsData();
         }
     }
 }
